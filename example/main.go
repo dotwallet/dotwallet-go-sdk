@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/huobirdcenter/huobi_golang/config"
 	"io/ioutil"
 	"net/http"
 
@@ -498,29 +499,27 @@ type Config struct {
 }
 
 func main() {
-
 	configFilePath := flag.String("config", "./config.json", "Path of config file")
 	flag.Parse()
 	configJSON, err := ioutil.ReadFile(*configFilePath)
 	if err != nil {
 		panic(err)
 	}
-	config := new(Config)
-	err = json.Unmarshal(configJSON, config)
+	gConfig := new(Config)
+	err = json.Unmarshal(configJSON, gConfig)
 	if err != nil {
 		panic(err)
 	}
-	gConfig = config
 
-	client, err := dotwallet.NewClient(
-		config.Host,
-		config.ClientId,
-		config.ClientSecret,
-		config.RedirectUri,
+	gClient, err = dotwallet.NewClient(
+		gConfig.Host,
+		gConfig.ClientId,
+		gConfig.ClientSecret,
+		gConfig.RedirectUri,
 	)
 	if err != nil {
 		panic(err)
 	}
-	gClient = client
+
 	StartHttpServer()
 }
