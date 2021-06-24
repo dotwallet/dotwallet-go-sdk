@@ -64,7 +64,7 @@ func DoHttpRequest(method string, url string, urlValues *url.Values, header http
 		return nil, err
 	}
 	request.Header = header
-	ToCurlStr(method, header, contentByte, url)
+	// ToCurlStr(method, header, contentByte, url)
 	resp, err := httpClient.Do(request)
 	if err != nil {
 		return nil, err
