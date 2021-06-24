@@ -24,7 +24,7 @@ var htmlStr string = `<!DOCTYPE html>
 
 <body>
     <div id="displayZoom">
-        <button type="button" onclick="dotWalletAuth()">dotwallet login</button>
+        <button type="button" onclick="dotWalletAuth()">dotwallet Login</button>
         <br>
         <button type="button" hidden="hidden" id="GetUserReceiveAddressParaList" onclick="ShowGetUserReceiveAddress()">
             get user receive address
@@ -133,7 +133,7 @@ var htmlStr string = `<!DOCTYPE html>
                 console.log(request.responseText)
             }
         }
-        function passwordLogIn() {
+        function passwordLogin() {
             let username = document.getElementById("username").value;
 
             let password = document.getElementById("password").value;
@@ -165,14 +165,14 @@ var htmlStr string = `<!DOCTYPE html>
 
 
 
-        function dotWalletLogIn() {
+        function dotWalletLogin() {
             let code = decodeURI(getQuery("code"))
             let state = decodeURI(getQuery("state"))
             if (code != "undefined" && state != "undefined") {
                 let CodeState = Object();
                 CodeState.code = code
                 CodeState.state = state
-                DoAjax("POST", "dot_wallet_login", null, CodeState, function (request) {
+                DoAjax("POST", "dot_wallet_Login", null, CodeState, function (request) {
                     let response = JSON.parse(request.responseText)
                     if (response.code != 0) {
                         alert(response.msg)
@@ -274,7 +274,7 @@ var htmlStr string = `<!DOCTYPE html>
 
 
 
-        dotWalletLogIn()
+        dotWalletLogin()
 
 
 
@@ -351,43 +351,39 @@ func DotWalletAuth(rsp http.ResponseWriter, req *http.Request) {
 	)
 }
 
-type DotWalletLogInRequest struct {
+type DotWalletLoginRequest struct {
 	Code  string `json:"code"`
 	State string `json:"state"`
 }
 
-type LogInResponse struct {
+type LoginResponse struct {
 	Id string `json:"id"`
 }
 
-func createNewUserReturnId() (string, error) {
-	return uuid.NewV4().String(), nil
-}
-
-func DotWalletLogIn(rsp http.ResponseWriter, req *http.Request) {
-	dotWalletLogInRequest := &DotWalletLogInRequest{}
+func DotWalletLogin(rsp http.ResponseWriter, req *http.Request) {
+	dotWalletLoginRequest := &DotWalletLoginRequest{}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		rsp.Write(MakeErrHttpJsonResponse(-1, err.Error()))
 		return
 	}
-	err = json.Unmarshal(body, dotWalletLogInRequest)
+	err = json.Unmarshal(body, dotWalletLoginRequest)
 	if err != nil {
 		rsp.Write(MakeErrHttpJsonResponse(-1, err.Error()))
 		return
 	}
-	_, ok := gStates[dotWalletLogInRequest.State]
+	_, ok := gStates[dotWalletLoginRequest.State]
 	if !ok {
 		rsp.Write(MakeErrHttpJsonResponse(-1, "state not found"))
 		return
 	}
-	dotUser, err := gClient.GetDotUser(dotWalletLogInRequest.Code, dotWalletLogInRequest.State)
+	dotUser, err := gClient.GetDotUser(dotWalletLoginRequest.Code, dotWalletLoginRequest.State)
 	if err != nil {
 		rsp.Write(MakeErrHttpJsonResponse(-1, err.Error()))
 		return
 	}
 	rsp.Write(MakeOKHttpJsonResponseByInterface(
-		&LogInResponse{
+		&LoginResponse{
 			DotUserId2UserId(dotUser.Id),
 		},
 	))
@@ -469,7 +465,7 @@ func AutoPayNotify(rsp http.ResponseWriter, req *http.Request) {
 	fmt.Println(string(body))
 }
 
-func LogInPadge(rsp http.ResponseWriter, req *http.Request) {
+func LoginPage(rsp http.ResponseWriter, req *http.Request) {
 	rsp.Header().Set("Content-Type", "text/html")
 	rsp.Write([]byte(htmlStr))
 }
@@ -477,12 +473,12 @@ func LogInPadge(rsp http.ResponseWriter, req *http.Request) {
 func StartHttpServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/dot_wallet_auth", DotWalletAuth)
-	r.HandleFunc("/dot_wallet_login", DotWalletLogIn)
+	r.HandleFunc("/dot_wallet_Login", DotWalletLogin)
 	r.HandleFunc("/get_user_receive_address", GetUserReceiveAddress)
 	r.HandleFunc("/auto_pay", AutoPay)
 	r.HandleFunc("/auto_pay_notify", AutoPayNotify)
-	r.HandleFunc("/login", LogInPadge)
-	r.HandleFunc("/", LogInPadge)
+	r.HandleFunc("/Login", LoginPage)
+	r.HandleFunc("/", LoginPage)
 	err := http.ListenAndServe("0.0.0.0:8080", r)
 	if err != nil {
 		panic(err)
@@ -498,7 +494,6 @@ type Config struct {
 }
 
 func main() {
-
 	configFilePath := flag.String("config", "./config.json", "Path of config file")
 	flag.Parse()
 	configJSON, err := ioutil.ReadFile(*configFilePath)
