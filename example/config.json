@@ -3,5 +3,6 @@
     "ClientId": "",
     "ClientSecret": "",
     "RedirectUri": "",
-    "NotifyUrl": ""
+    "NotifyUrl": "",
+    "Listen": "0.0.0.0:8080"
 }

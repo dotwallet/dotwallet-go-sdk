@@ -479,7 +479,7 @@ func StartHttpServer() {
 	r.HandleFunc("/auto_pay_notify", AutoPayNotify)
 	r.HandleFunc("/login", LoginPage)
 	r.HandleFunc("/", LoginPage)
-	err := http.ListenAndServe("0.0.0.0:8080", r)
+	err := http.ListenAndServe(gConfig.Listen, r)
 	if err != nil {
 		panic(err)
 	}
@@ -491,6 +491,7 @@ type Config struct {
 	ClientSecret string
 	RedirectUri  string
 	NotifyUrl    string
+	Listen       string
 }
 
 func main() {
