@@ -172,7 +172,7 @@ var htmlStr string = `<!DOCTYPE html>
                 let CodeState = Object();
                 CodeState.code = code
                 CodeState.state = state
-                DoAjax("POST", "dot_wallet_Login", null, CodeState, function (request) {
+                DoAjax("POST", "dot_wallet_login", null, CodeState, function (request) {
                     let response = JSON.parse(request.responseText)
                     if (response.code != 0) {
                         alert(response.msg)
@@ -473,11 +473,11 @@ func LoginPage(rsp http.ResponseWriter, req *http.Request) {
 func StartHttpServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/dot_wallet_auth", DotWalletAuth)
-	r.HandleFunc("/dot_wallet_Login", DotWalletLogin)
+	r.HandleFunc("/dot_wallet_login", DotWalletLogin)
 	r.HandleFunc("/get_user_receive_address", GetUserReceiveAddress)
 	r.HandleFunc("/auto_pay", AutoPay)
 	r.HandleFunc("/auto_pay_notify", AutoPayNotify)
-	r.HandleFunc("/Login", LoginPage)
+	r.HandleFunc("/login", LoginPage)
 	r.HandleFunc("/", LoginPage)
 	err := http.ListenAndServe("0.0.0.0:8080", r)
 	if err != nil {
