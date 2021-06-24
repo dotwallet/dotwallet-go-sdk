@@ -286,9 +286,9 @@ var htmlStr string = `<!DOCTYPE html>
 
 var gClient *dotwallet.Client
 
-var gStates map[string]bool = make(map[string]bool)
+var gStates = make(map[string]bool)
 
-var gConfig *Config
+var gConfig = &Config{}
 
 type HttpJsonResponse struct {
 	Code int             `json:"code"`
@@ -500,22 +500,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	config := new(Config)
-	err = json.Unmarshal(configJSON, config)
+
+	err = json.Unmarshal(configJSON, gConfig)
 	if err != nil {
 		panic(err)
 	}
-	gConfig = config
 
-	client, err := dotwallet.NewClient(
-		config.Host,
-		config.ClientId,
-		config.ClientSecret,
-		config.RedirectUri,
+	gClient, err = dotwallet.NewClient(
+		gConfig.Host,
+		gConfig.ClientId,
+		gConfig.ClientSecret,
+		gConfig.RedirectUri,
 	)
 	if err != nil {
 		panic(err)
 	}
-	gClient = client
+
 	StartHttpServer()
 }
