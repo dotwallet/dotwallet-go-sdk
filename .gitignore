@@ -2,3 +2,4 @@ dotwallet-go-sdk
 example/example
 *log
 example/config_test.json
+.DS_Store
