@@ -104,7 +104,6 @@ var htmlStr string = `<!DOCTYPE html>
     <script>
 
         var id = "";
-        console.log("id:", id)
 
         function DoAjax(method, uri, header, reqdata, callbackWhenReadyState4) {
             request = new XMLHttpRequest();
@@ -136,10 +135,8 @@ var htmlStr string = `<!DOCTYPE html>
         }
         function passwordLogIn() {
             let username = document.getElementById("username").value;
-            console.log(username);
 
             let password = document.getElementById("password").value;
-            console.log(password);
 
 
             let UsernamePassword = Object();
@@ -160,7 +157,6 @@ var htmlStr string = `<!DOCTYPE html>
         }
         function dotWalletAuth() {
             DoAjax("GET", "dot_wallet_auth", null, null, function () {
-                console.log(request.responseText)
                 window.location.replace(request.responseText)
                 return
             })
@@ -173,19 +169,16 @@ var htmlStr string = `<!DOCTYPE html>
             let code = decodeURI(getQuery("code"))
             let state = decodeURI(getQuery("state"))
             if (code != "undefined" && state != "undefined") {
-                console.log("dotwallet------------------")
                 let CodeState = Object();
                 CodeState.code = code
                 CodeState.state = state
                 DoAjax("POST", "dot_wallet_login", null, CodeState, function (request) {
-                    console.log(request.responseText)
                     let response = JSON.parse(request.responseText)
                     if (response.code != 0) {
                         alert(response.msg)
                         return
                     }
                     id = response.data.id
-                    console.log("id:", id)
                     let GetUserReceiveAddressParaList = document.getElementById("GetUserReceiveAddressParaList")
                     GetUserReceiveAddressParaList.removeAttribute("hidden")
                     let GetAutoPayParamList = document.getElementById("GetAutoPayParamList")
@@ -201,7 +194,6 @@ var htmlStr string = `<!DOCTYPE html>
 
 
         function DisplayOrHide(elemId) {
-            console.log("DisplayOrHide------", elemId)
             let elem = document.getElementById(elemId)
             let hidden = elem.getAttribute("hidden")
             if (hidden == "hidden") {
@@ -225,14 +217,11 @@ var htmlStr string = `<!DOCTYPE html>
 
         function GetUserReceiveAddress() {
             let coinType = document.getElementById("GetUserReceiveAddress_coin_type").value;
-            console.log(coinType);
-            console.log(id);
 
             let GetUserReceiveAddressRequest = Object();
             GetUserReceiveAddressRequest.coin_type = coinType
             GetUserReceiveAddressRequest.id = id
             DoAjax("POST", "get_user_receive_address", null, GetUserReceiveAddressRequest, function () {
-                console.log(request.responseText)
                 let GetUserReceiveAddressResult = document.getElementById("GetUserReceiveAddressResult")
                 GetUserReceiveAddressResult.innerHTML = request.responseText
             })
@@ -278,7 +267,6 @@ var htmlStr string = `<!DOCTYPE html>
             AutoPayRequest.product = product
 
             DoAjax("POST", "auto_pay", null, AutoPayRequest, function () {
-                console.log(request.responseText)
                 let AutoPayResult = document.getElementById("AutoPayResult")
                 AutoPayResult.innerHTML = request.responseText
             })
