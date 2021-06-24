@@ -25,7 +25,7 @@ func ToJson(data interface{}) string {
 	return string(b)
 }
 
-func ToCurlStr(method string, header map[string]string, body []byte, url string) {
+func ToCurlStr(method string, header http.Header, body []byte, url string) {
 	var b strings.Builder
 	b.WriteString("curl ")
 	for key, value := range header {
@@ -33,7 +33,7 @@ func ToCurlStr(method string, header map[string]string, body []byte, url string)
 		b.WriteString("\"")
 		b.WriteString(key)
 		b.WriteString(":")
-		b.WriteString(value)
+		b.WriteString(value[0])
 		b.WriteString("\" ")
 	}
 	b.WriteString("-X ")
@@ -46,7 +46,7 @@ func ToCurlStr(method string, header map[string]string, body []byte, url string)
 	fmt.Println(b.String())
 }
 
-func DoHttpRequest(method string, url string, urlValues *url.Values, headers map[string]string, reqBody interface{}) ([]byte, error) {
+func DoHttpRequest(method string, url string, urlValues *url.Values, header http.Header, reqBody interface{}) ([]byte, error) {
 	httpClient := &http.Client{}
 	contentByte := make([]byte, 0, 8)
 	if reqBody != nil {
@@ -59,15 +59,12 @@ func DoHttpRequest(method string, url string, urlValues *url.Values, headers map
 	if urlValues != nil {
 		url = fmt.Sprintf("%s?%s", url, urlValues.Encode())
 	}
-	// fmt.Println(url)
 	request, err := http.NewRequest(method, url, bytes.NewReader(contentByte))
 	if err != nil {
 		return nil, err
 	}
-	for key, value := range headers {
-		request.Header.Add(key, value)
-	}
-	ToCurlStr(method, headers, contentByte, url)
+	request.Header = header
+	ToCurlStr(method, header, contentByte, url)
 	resp, err := httpClient.Do(request)
 	if err != nil {
 		return nil, err

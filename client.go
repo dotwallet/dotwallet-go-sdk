@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
 const (
-	SCOPT_USER_INFO   = "user.info"
-	SCOPT_AUTOPAY_BSV = "autopay.bsv"
-	SCOPT_AUTOPAY_BTC = "autopay.btc"
-	SCOPT_AUTOPAY_ETH = "autopay.eth"
+	SCOPE_USER_INFO   = "user.info"
+	SCOPE_AUTOPAY_BSV = "autopay.bsv"
+	SCOPE_AUTOPAY_BTC = "autopay.btc"
+	SCOPE_AUTOPAY_ETH = "autopay.eth"
 
 	COIN_BSV = "BSV"
 	COIN_BTC = "BTC"
@@ -56,6 +57,7 @@ type CodeMsgData struct {
 
 type Client struct {
 	token                    string
+	tokenType                string
 	host                     string
 	clientId                 string
 	clientSecret             string
@@ -78,14 +80,65 @@ func (this *Client) GetAuthorizeUrl(state string, scopes []string) string {
 	return fmt.Sprintf("%s%s?%s", this.host, AUTHORIZE_URI, urlValues.Encode())
 }
 
-func (this *Client) DoHttpRequestCodeMsgData(method string, url string, urlValues *url.Values, headers map[string]string, token string, reqBody interface{}, rspData interface{}) error {
-	localHeader := make(map[string]string)
-	localHeader[HTTP_CONTENT_TYPE] = HTTP_APPLICATION_JSON
-	for key, value := range headers {
-		localHeader[key] = value
+type TokenTokenType struct {
+	Token     string
+	TokenType string
+}
+
+func (this *Client) DoHttpRequestWithToken(
+	method string,
+	url string,
+	urlValues *url.Values,
+	headers http.Header,
+	reqBody interface{},
+	rspData interface{},
+) error {
+	if headers == nil {
+		headers = make(http.Header)
 	}
-	localHeader[HEADER_AUTHORIZATION] = "Bearer " + token
-	body, err := DoHttpRequest(method, url, urlValues, localHeader, reqBody)
+	headers.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", this.tokenType, this.token))
+	err := this.DoHttpRequest(
+		method,
+		url,
+		urlValues,
+		headers,
+		reqBody,
+		rspData,
+	)
+	if err == nil {
+		return nil
+	}
+	if !strings.Contains(err.Error(), "Your login status has expired") {
+		return err
+	}
+	err = this.UpdateApplicationAccessToken()
+	if err != nil {
+		return err
+	}
+	headers.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", this.tokenType, this.token))
+	return this.DoHttpRequest(
+		method,
+		url,
+		urlValues,
+		headers,
+		reqBody,
+		rspData,
+	)
+}
+
+func (this *Client) DoHttpRequest(
+	method string,
+	url string,
+	urlValues *url.Values,
+	headers http.Header,
+	reqBody interface{},
+	rspData interface{},
+) error {
+	if headers == nil {
+		headers = make(http.Header)
+	}
+	headers.Set(HTTP_CONTENT_TYPE, HTTP_APPLICATION_JSON)
+	body, err := DoHttpRequest(method, url, urlValues, headers, reqBody)
 	if err != nil {
 		return err
 	}
@@ -94,19 +147,10 @@ func (this *Client) DoHttpRequestCodeMsgData(method string, url string, urlValue
 	if err != nil {
 		return err
 	}
-	if codeMsgData.Code == 0 {
-		err := json.Unmarshal(codeMsgData.Data, rspData)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		return nil
-	}
-	if !strings.Contains(codeMsgData.Msg, "todo") {
+	if codeMsgData.Code != 0 {
 		return errors.New(codeMsgData.Msg)
 	}
-
-	return nil
+	return json.Unmarshal(codeMsgData.Data, rspData)
 }
 
 type DotUserTokenInfo struct {
@@ -153,12 +197,11 @@ func (this *Client) GetUserTokenInfo(code string) (*DotUserTokenInfo, error) {
 		RedirectUri:  this.redirectUri,
 	}
 	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequestCodeMsgData(
+	err := this.DoHttpRequest(
 		HTTP_POST,
 		this.getAccessTokenUrl,
 		nil,
 		nil,
-		"",
 		getUserTokenInfoRequest,
 		getAccessTokenResponse,
 	)
@@ -183,7 +226,7 @@ func (this *Client) RefreshToken(RefreshToken string) (*DotUserTokenInfo, error)
 		RefreshToken: RefreshToken,
 	}
 	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequestCodeMsgData(HTTP_POST, this.getAccessTokenUrl, nil, nil, "", refreshTokenRequest, getAccessTokenResponse)
+	err := this.DoHttpRequest(HTTP_POST, this.getAccessTokenUrl, nil, nil, refreshTokenRequest, getAccessTokenResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -196,13 +239,14 @@ type DotUserInfo struct {
 	Avatar   string `json:"avatar"`
 }
 
-func (this *Client) GetDotUserInfoByToken(
+func (this *Client) GetDotUserInfoByUserToken(
 	AccessToken string,
+	TokenType string,
 ) (*DotUserInfo, error) {
-	header := make(map[string]string)
-	header[HEADER_AUTHORIZATION] = "Bearer " + AccessToken
+	header := make(http.Header)
+	header.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", TokenType, AccessToken))
 	getUserInfoResponse := &DotUserInfo{}
-	err := this.DoHttpRequestCodeMsgData(HTTP_POST, this.getUserInfoUrl, nil, header, AccessToken, nil, getUserInfoResponse)
+	err := this.DoHttpRequest(HTTP_POST, this.getUserInfoUrl, nil, header, nil, getUserInfoResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +258,7 @@ func (this *Client) GetDotUser(code string, state string) (*DotUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	dotUserInfo, err := this.GetDotUserInfoByToken(userTokenInfo.AccessToken)
+	dotUserInfo, err := this.GetDotUserInfoByUserToken(userTokenInfo.AccessToken, userTokenInfo.TokenType)
 	if err != nil {
 		return nil, err
 	}
@@ -236,19 +280,20 @@ type GetApplicationAccessTokenRequest struct {
 	ClientSecret string `json:"client_secret"`
 }
 
-func (this *Client) GetApplicationAccessToken() (string, error) {
+func (this *Client) UpdateApplicationAccessToken() error {
 	getAccessTokenRequest := &GetApplicationAccessTokenRequest{
 		ClientId:     this.clientId,
 		GrantType:    GRANT_TYPE_CLIENT_CREDENTIALS,
 		ClientSecret: this.clientSecret,
 	}
 	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequestCodeMsgData(HTTP_POST, this.getAccessTokenUrl, nil, nil, "", getAccessTokenRequest, getAccessTokenResponse)
+	err := this.DoHttpRequest(HTTP_POST, this.getAccessTokenUrl, nil, nil, getAccessTokenRequest, getAccessTokenResponse)
 	if err != nil {
-		return "", err
+		return err
 	}
 	this.token = getAccessTokenResponse.AccessToken
-	return this.token, nil
+	this.tokenType = getAccessTokenResponse.TokenType
+	return nil
 }
 
 type GetUserReceiveAddressRequest struct {
@@ -274,11 +319,17 @@ func (this *Client) GetUserReceiveAddress(id string, coinType string) (*GetUserR
 		CoinType: coinType,
 	}
 	getUserReceiveAddressResponse := &GetUserReceiveAddressResponse{}
-	err := this.DoHttpRequestCodeMsgData(HTTP_POST, this.getUserReceiveAddressUrl, nil, nil, this.token, getUserReceiveAddressRequest, getUserReceiveAddressResponse)
+	err := this.DoHttpRequestWithToken(
+		HTTP_POST,
+		this.getUserReceiveAddressUrl,
+		nil,
+		nil,
+		getUserReceiveAddressRequest,
+		getUserReceiveAddressResponse,
+	)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(ToJson(getUserReceiveAddressResponse))
 	return getUserReceiveAddressResponse, nil
 }
 
@@ -315,7 +366,7 @@ type AutoPayResponse struct {
 
 func (this *Client) AutoPay(autoPayRequest *AutoPayRequest) (*AutoPayResponse, error) {
 	autoPayResponse := &AutoPayResponse{}
-	err := this.DoHttpRequestCodeMsgData(HTTP_POST, this.autoPayUrl, nil, nil, this.token, autoPayRequest, autoPayResponse)
+	err := this.DoHttpRequestWithToken(HTTP_POST, this.autoPayUrl, nil, nil, autoPayRequest, autoPayResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -338,7 +389,7 @@ func NewClient(
 		getUserReceiveAddressUrl: fmt.Sprintf("%s%s", host, GET_USER_RECEIVE_ADDRESS_URI),
 		autoPayUrl:               fmt.Sprintf("%s%s", host, AUTOPAY_URI),
 	}
-	_, err := client.GetApplicationAccessToken()
+	err := client.UpdateApplicationAccessToken()
 	if err != nil {
 		return nil, err
 	}

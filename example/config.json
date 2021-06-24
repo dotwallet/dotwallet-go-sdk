@@ -1,0 +1,7 @@
+{
+    "Host": "http://192.168.1.13:6001",
+    "ClientId": "",
+    "ClientSecret": "",
+    "RedirectUri": "http://192.168.1.141:10086/login",
+    "NotifyUrl": "http://192.168.1.141:10086/auto_pay_notify"
+}
