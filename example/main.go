@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/huobirdcenter/huobi_golang/config"
 	"io/ioutil"
 	"net/http"
 
