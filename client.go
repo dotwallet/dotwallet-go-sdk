@@ -2,7 +2,6 @@ package dotwallet
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -37,6 +36,25 @@ const (
 	GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code"
 	GRANT_TYPE_REFRESH_TOKEN      = "refresh_token"
 )
+
+type DotError struct {
+	Code int
+	Msg  string
+}
+
+func (this *DotError) Error() string {
+	return fmt.Sprintf("%d:%s", this.Code, this.Msg)
+}
+
+func NewDotError(
+	Code int,
+	Msg string,
+) error {
+	return &DotError{
+		Code: Code,
+		Msg:  Msg,
+	}
+}
 
 type DotUser struct {
 	Id           string
@@ -148,7 +166,7 @@ func (this *Client) DoHttpRequest(
 		return err
 	}
 	if codeMsgData.Code != 0 {
-		return errors.New(codeMsgData.Msg)
+		return NewDotError(codeMsgData.Code, codeMsgData.Msg)
 	}
 	return json.Unmarshal(codeMsgData.Data, rspData)
 }
