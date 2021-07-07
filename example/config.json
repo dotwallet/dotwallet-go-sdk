@@ -1,8 +1,0 @@
-{
-    "Host": "https://api.ddpurse.com",
-    "ClientId": "",
-    "ClientSecret": "",
-    "RedirectUri": "",
-    "NotifyUrl": "",
-    "Listen": "0.0.0.0:8080"
-}
