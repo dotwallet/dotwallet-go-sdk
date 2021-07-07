@@ -5,7 +5,10 @@ go 1.14
 require (
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/jarcoal/httpmock v1.0.8
+	github.com/julienschmidt/httprouter v1.3.0
+	github.com/mrz1836/go-api-router v0.3.10
 	github.com/stretchr/testify v1.7.0
+	github.com/ugorji/go v1.2.6 // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
