@@ -1,5 +1,5 @@
-# DotWallet SDK (Unofficial Fork)
-> A golang client for the [DotWallet](https://dotwallet.com) [API](https://developers.dotwallet.com/documents/en/#intro). [(Visit the Original repo/library)](https://github.com/dotwallet/dotwallet-go-sdk)
+# DotWallet SDK
+> A golang client for the [DotWallet](https://dotwallet.com) [API](https://developers.dotwallet.com/documents/en/#intro)
 
 [![Release](https://img.shields.io/github/release-pre/dotwallet/dotwallet-go-sdk.svg?logo=github&style=flat&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/releases)
 [![Build Status](https://img.shields.io/github/workflow/status/dotwallet/dotwallet-go-sdk/run-go-tests?logo=github&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/actions)
@@ -172,9 +172,6 @@ Checkout all the [examples](examples)!
 <br/>
 
 ## Maintainers & Contributors
-This is an "unofficial fork" of the [official library](https://github.com/dotwallet/dotwallet-go-sdk) and was 
-created to enhance or improve missing functionality.
-
 | <img src="https://i.imgur.com/sAc5hoe.png" height="50" alt="吴浩瑜" /> | <img src="https://i.imgur.com/sAc5hoe.png" height="50" alt="chenhao" /> | [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) |
 |:---:|:---:|:---:|
 | 吴浩瑜 | chenhao | [MrZ](https://github.com/mrz1836) |
