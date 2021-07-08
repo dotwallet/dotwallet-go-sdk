@@ -1,3 +1,3 @@
-module github.com/dotwallet/dotwallet-go-sdk
+module dotwallet
 
 go 1.14
