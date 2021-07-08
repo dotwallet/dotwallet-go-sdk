@@ -1,12 +1,13 @@
 package main
 
 import (
-	"dotwallet"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	dotwallet "github.com/dotwallet/dotwallet-go-sdk"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
