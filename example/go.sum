@@ -1,6 +1,0 @@
-github.com/dotwallet/dotwallet-go-sdk v0.0.0-20210708025844-e4b1787e34af h1:uIz97V8dW9/e8wtvkYAFU81RPVpBnujXBT8G3aDbcd8=
-github.com/dotwallet/dotwallet-go-sdk v0.0.0-20210708025844-e4b1787e34af/go.mod h1:yYKP71PJQFbJnn90YesGvvnSmAs2qI2DXjsTD9pZCn8=
-github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
-github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/satori/go.uuid v1.2.0 h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=
-github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=

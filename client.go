@@ -1,415 +1,321 @@
 package dotwallet
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
-const (
-	SCOPE_USER_INFO   = "user.info"
-	SCOPE_AUTOPAY_BSV = "autopay.bsv"
-	SCOPE_AUTOPAY_BTC = "autopay.btc"
-	SCOPE_AUTOPAY_ETH = "autopay.eth"
-
-	COIN_BSV = "BSV"
-	COIN_BTC = "BTC"
-	COIN_ETH = "ETH"
-
-	GET_ACCESS_TOKEN_URI         = "/v1/oauth2/get_access_token"
-	GET_USER_INFO_URI            = "/v1/user/get_user_info"
-	AUTHORIZE_URI                = "/v1/oauth2/authorize"
-	GET_USER_RECEIVE_ADDRESS_URI = "/v1/user/get_user_receive_address"
-	AUTOPAY_URI                  = "/v1/transact/order/autopay"
-
-	TO_TYPE_ADDRESS          = "address"
-	TO_TYPE_PAYMAIL          = "paymail"
-	TO_TYPE_SCRIPT           = "script"
-	TO_TYPE_USER_PRIMARY_WEB = "user_primary_web"
-
-	HEADER_AUTHORIZATION = "Authorization"
-
-	GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
-	GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code"
-	GRANT_TYPE_REFRESH_TOKEN      = "refresh_token"
-)
-
-type DotError struct {
-	Code int
-	Msg  string
-}
-
-func (this *DotError) Error() string {
-	return fmt.Sprintf("%d:%s", this.Code, this.Msg)
-}
-
-func NewDotError(
-	Code int,
-	Msg string,
-) error {
-	return &DotError{
-		Code: Code,
-		Msg:  Msg,
-	}
-}
-
-type DotUser struct {
-	Id           string
-	RefreshToken string
-	AccessToken  string
-	ExpiredAt    int64
-	TokenType    string
-	Nickname     string
-	Avatar       string
-	Scopes       []string
-}
-
-type CodeMsgData struct {
-	Code int             `json:"code"`
-	Msg  string          `json:"msg"`
-	Data json.RawMessage `json:"data"`
-}
-
+// Client is the TonicPow client/configuration
 type Client struct {
-	token                    string
-	tokenType                string
-	host                     string
-	clientId                 string
-	clientSecret             string
-	getAccessTokenUrl        string
-	authorizeUrl             string
-	redirectUri              string
-	getUserInfoUrl           string
-	getUserReceiveAddressUrl string
-	autoPayUrl               string
+	options *clientOptions // Options are all the default settings / configuration
 }
 
-func (this *Client) GetAuthorizeUrl(state string, scopes []string) string {
-	urlValues := &url.Values{}
-	urlValues.Add("client_id", this.clientId)
-	urlValues.Add("redirect_uri", this.redirectUri)
-	urlValues.Add("state", state)
-	strings.Join(scopes, " ")
-	urlValues.Add("scope", strings.Join(scopes, " "))
-	urlValues.Add("response_type", "code")
-	return fmt.Sprintf("%s%s?%s", this.host, AUTHORIZE_URI, urlValues.Encode())
+// clientOptions holds all the configuration for client requests and default resources
+type clientOptions struct {
+	clientID       string              // Your client ID
+	clientSecret   string              // Your client secret
+	customHeaders  map[string][]string // Custom headers on outgoing requests
+	getTokenOnLoad bool                // If enabled, it will automatically fetch the application token
+	host           string              // API host
+	httpClient     *resty.Client       // Resty client for all HTTP requests
+	httpTimeout    time.Duration       // Default timeout in seconds for GET requests
+	redirectURI    string              // The redirect URI for oauth requests
+	requestTracing bool                // If enabled, it will trace the request timing
+	retryCount     int                 // Default retry count for HTTP requests
+	token          *DotAccessToken     // The application authentication token (object)
+	userAgent      string              // User agent for all outgoing requests
 }
 
-type TokenTokenType struct {
-	Token     string
-	TokenType string
-}
+// ClientOps allow functional options to be supplied
+// that overwrite default client options.
+type ClientOps func(c *clientOptions)
 
-func (this *Client) DoHttpRequestWithToken(
-	method string,
-	url string,
-	urlValues *url.Values,
-	headers http.Header,
-	reqBody interface{},
-	rspData interface{},
-) error {
-	if headers == nil {
-		headers = make(http.Header)
+// WithHTTPTimeout can be supplied to adjust the default http client timeouts.
+// The http client is used when creating requests
+// Default timeout is 10 seconds.
+func WithHTTPTimeout(timeout time.Duration) ClientOps {
+	return func(c *clientOptions) {
+		c.httpTimeout = timeout
 	}
-	headers.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", this.tokenType, this.token))
-	err := this.DoHttpRequest(
-		method,
-		url,
-		urlValues,
-		headers,
-		reqBody,
-		rspData,
-	)
-	if err == nil {
+}
+
+// WithRequestTracing will enable tracing.
+// Tracing is disabled by default.
+func WithRequestTracing() ClientOps {
+	return func(c *clientOptions) {
+		c.requestTracing = true
+	}
+}
+
+// WithAutoLoadToken will load the application token when spawning a new client
+// By default, this is disabled, so you can make a new client without making an HTTP request
+func WithAutoLoadToken() ClientOps {
+	return func(c *clientOptions) {
+		c.getTokenOnLoad = true
+	}
+}
+
+// WithRetryCount will overwrite the default retry count for http requests.
+// Default retries is 2.
+func WithRetryCount(retries int) ClientOps {
+	return func(c *clientOptions) {
+		c.retryCount = retries
+	}
+}
+
+// WithUserAgent will overwrite the default useragent.
+// Default is package name + version.
+func WithUserAgent(userAgent string) ClientOps {
+	return func(c *clientOptions) {
+		if len(userAgent) > 0 {
+			c.userAgent = userAgent
+		}
+	}
+}
+
+// WithCredentials will set the ClientID and ClientSecret
+// There is no default
+func WithCredentials(clientID, clientSecret string) ClientOps {
+	return func(c *clientOptions) {
+		c.clientID = strings.TrimSpace(clientID)
+		c.clientSecret = strings.TrimSpace(clientSecret)
+	}
+}
+
+// WithHost will overwrite the default host.
+// Default is located in definitions
+func WithHost(host string) ClientOps {
+	return func(c *clientOptions) {
+		host = strings.TrimSpace(host)
+		if len(host) > 0 {
+			c.host = host
+		}
+	}
+}
+
+// WithRedirectURI will set the redirect URI for user authentication callbacks
+// There is no default
+func WithRedirectURI(redirectURI string) ClientOps {
+	return func(c *clientOptions) {
+		c.redirectURI = strings.TrimSpace(redirectURI)
+	}
+}
+
+// WithCustomHeaders will add custom headers to outgoing requests
+// Custom headers is empty by default
+func WithCustomHeaders(headers map[string][]string) ClientOps {
+	return func(c *clientOptions) {
+		c.customHeaders = headers
+	}
+}
+
+// WithCustomHTTPClient will overwrite the default client with a custom client.
+func WithCustomHTTPClient(client *resty.Client) ClientOps {
+	return func(c *clientOptions) {
+		c.httpClient = client
+	}
+}
+
+// WithApplicationAccessToken will override the token on the client
+func WithApplicationAccessToken(token DotAccessToken) ClientOps {
+	return func(c *clientOptions) {
+		c.token = &token
+	}
+}
+
+// NewClient creates a new client for all TonicPow requests
+//
+// If no options are given, it will use the DefaultClientOptions()
+// If there is no client is supplied, it will use a default Resty HTTP client.
+func NewClient(opts ...ClientOps) (*Client, error) {
+	defaults := defaultClientOptions()
+
+	// Create a new client
+	client := &Client{
+		options: defaults,
+	}
+
+	// overwrite defaults with any set by user
+	for _, opt := range opts {
+		opt(client.options)
+	}
+
+	// Check for Client ID
+	if client.options.clientID == "" {
+		return nil, errors.New("missing an client_id")
+	}
+
+	// Check for Client Secret
+	if client.options.clientSecret == "" {
+		return nil, errors.New("missing an client_secret")
+	}
+
+	// Set the Resty HTTP client
+	if client.options.httpClient == nil {
+		client.options.httpClient = resty.New()
+		// Set defaults (for GET requests)
+		client.options.httpClient.SetTimeout(client.options.httpTimeout)
+		client.options.httpClient.SetRetryCount(client.options.retryCount)
+	}
+
+	// Autoload the token?
+	if client.options.getTokenOnLoad {
+		if err := client.UpdateApplicationAccessToken(); err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
+}
+
+// defaultClientOptions will return a clientOptions struct with the default settings
+//
+// Useful for starting with the default and then modifying as needed
+func defaultClientOptions() (opts *clientOptions) {
+	// Set the default options
+	opts = &clientOptions{
+		host:           defaultHost,
+		httpTimeout:    defaultHTTPTimeout,
+		requestTracing: false,
+		retryCount:     defaultRetryCount,
+		userAgent:      defaultUserAgent,
+	}
+	return
+}
+
+// GetUserAgent will return the user agent string of the client
+func (c *Client) GetUserAgent() string {
+	return c.options.userAgent
+}
+
+// Token will return the token for the application
+func (c *Client) Token() *DotAccessToken {
+	// Skip panics
+	if c == nil || c.options == nil {
 		return nil
 	}
-	if !strings.Contains(err.Error(), "Your login status has expired") {
-		return err
+	return c.options.token
+}
+
+// NewState returns a new state key for CSRF protection
+// It is not required to use this method, you can use your own UUID() for state validation
+//
+// For more information: https://developers.dotwallet.com/documents/en/#user-authorization
+func (c *Client) NewState() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
 	}
-	err = this.UpdateApplicationAccessToken()
+	return hex.EncodeToString(b), nil
+}
+
+// Request is a standard GET / POST / PUT / DELETE request for all outgoing HTTP requests
+// Omit the data attribute if using a GET request
+func (c *Client) Request(httpMethod string, requestEndpoint string,
+	data interface{}, expectedCode int, authorization *DotAccessToken) (response *StandardResponse, err error) {
+
+	// Set the user agent
+	req := c.options.httpClient.R().SetHeader("User-Agent", c.options.userAgent)
+
+	// Set the body if (PUT || POST)
+	if httpMethod != http.MethodGet && httpMethod != http.MethodDelete {
+		var j []byte
+		if j, err = json.Marshal(data); err != nil {
+			return
+		}
+		req = req.SetBody(string(j))
+		req.Header.Add("Content-Length", strconv.Itoa(len(j)))
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	// Enable tracing
+	if c.options.requestTracing {
+		req.EnableTrace()
+	}
+
+	// Set the authorization and content type (assuming it's application)
+	if authorization != nil && len(authorization.RefreshToken) == 0 {
+
+		// If the token is nil or expired, get a new token
+		if c.IsTokenExpired(authorization) {
+
+			// Update the access token
+			if err = c.UpdateApplicationAccessToken(); err != nil {
+				return
+			}
+		}
+
+		// Set the header authorization for the application
+		req.Header.Set(headerAuthorization, authorization.TokenType+" "+authorization.AccessToken)
+	} else if authorization != nil && len(authorization.RefreshToken) > 0 {
+
+		// If the token is expired, get a new token if we had a previous token
+		if c.IsTokenExpired(authorization) {
+
+			// Try to update the access token first
+			if authorization, err = c.RefreshUserToken(authorization); err != nil {
+				return
+			}
+		}
+
+		// Set the header authorization for the application
+		req.Header.Set(headerAuthorization, authorization.TokenType+" "+authorization.AccessToken)
+	}
+
+	// Custom headers?
+	for key, headers := range c.options.customHeaders {
+		for _, value := range headers {
+			req.Header.Set(key, value)
+		}
+	}
+
+	// Fire the request
+	var resp *resty.Response
+	switch httpMethod {
+	case http.MethodPost:
+		resp, err = req.Post(c.options.host + requestEndpoint)
+	// case http.MethodPut:
+	// 	resp, err = req.Put(c.options.host + requestEndpoint)
+	// case http.MethodDelete:
+	// 	resp, err = req.Delete(c.options.host + requestEndpoint)
+	case http.MethodGet:
+		resp, err = req.Get(c.options.host + requestEndpoint)
+	}
 	if err != nil {
-		return err
+		return
 	}
-	headers.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", this.tokenType, this.token))
-	return this.DoHttpRequest(
-		method,
-		url,
-		urlValues,
-		headers,
-		reqBody,
-		rspData,
-	)
-}
 
-func (this *Client) DoHttpRequest(
-	method string,
-	url string,
-	urlValues *url.Values,
-	headers http.Header,
-	reqBody interface{},
-	rspData interface{},
-) error {
-	if headers == nil {
-		headers = make(http.Header)
+	// Start the response
+	response = new(StandardResponse)
+
+	// Tracing enabled?
+	if c.options.requestTracing {
+		response.Tracing = resp.Request.TraceInfo()
 	}
-	headers.Set(HTTP_CONTENT_TYPE, HTTP_APPLICATION_JSON)
-	body, err := DoHttpRequest(method, url, urlValues, headers, reqBody)
-	if err != nil {
-		return err
+
+	// Set the status code & body
+	response.StatusCode = resp.StatusCode()
+	response.Body = resp.Body()
+
+	// Check expected code if set
+	if expectedCode > 0 && response.StatusCode != expectedCode {
+		response.Error = new(Error)
+		if err = json.Unmarshal(response.Body, &response.Error); err != nil {
+			return
+		}
+		err = fmt.Errorf("%s", response.Error.Message)
+		response.Error.Method = httpMethod
+		response.Error.URL = requestEndpoint
 	}
-	codeMsgData := &CodeMsgData{}
-	err = json.Unmarshal(body, codeMsgData)
-	if err != nil {
-		return err
-	}
-	if codeMsgData.Code != 0 {
-		return NewDotError(codeMsgData.Code, codeMsgData.Msg)
-	}
-	return json.Unmarshal(codeMsgData.Data, rspData)
-}
 
-type DotUserTokenInfo struct {
-	AccessToken  string   `json:"access_token"`
-	ExpiredAt    int64    `json:"expired_at"`
-	RefreshToken string   `json:"refresh_token"`
-	Scopes       []string `json:"scopes"`
-	TokenType    string   `json:"token_type"`
-}
-
-type GetDotUserTokenInfoRequest struct {
-	ClientId     string `json:"client_id"`
-	GrantType    string `json:"grant_type"`
-	ClientSecret string `json:"client_secret"`
-	Code         string `json:"code"`
-	RedirectUri  string `json:"redirect_uri"`
-}
-
-type GetAccessTokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token"`
-	Scope        string `json:"scope"`
-	TokenType    string `json:"token_type"`
-}
-
-func NewDotUserTokenInfo(getAccessTokenResponse *GetAccessTokenResponse) *DotUserTokenInfo {
-	scopes := strings.Split(getAccessTokenResponse.Scope, " ")
-	return &DotUserTokenInfo{
-		AccessToken:  getAccessTokenResponse.AccessToken,
-		ExpiredAt:    time.Now().Unix() + int64(getAccessTokenResponse.ExpiresIn),
-		RefreshToken: getAccessTokenResponse.RefreshToken,
-		Scopes:       scopes,
-		TokenType:    getAccessTokenResponse.TokenType,
-	}
-}
-
-func (this *Client) GetUserTokenInfo(code string) (*DotUserTokenInfo, error) {
-	getUserTokenInfoRequest := &GetDotUserTokenInfoRequest{
-		ClientId:     this.clientId,
-		GrantType:    GRANT_TYPE_AUTHORIZATION_CODE,
-		ClientSecret: this.clientSecret,
-		Code:         code,
-		RedirectUri:  this.redirectUri,
-	}
-	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequest(
-		HTTP_POST,
-		this.getAccessTokenUrl,
-		nil,
-		nil,
-		getUserTokenInfoRequest,
-		getAccessTokenResponse,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return NewDotUserTokenInfo(getAccessTokenResponse), nil
-}
-
-type RefreshTokenRequest struct {
-	ClientId     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	GrantType    string `json:"grant_type"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func (this *Client) RefreshToken(RefreshToken string) (*DotUserTokenInfo, error) {
-	refreshTokenRequest := &RefreshTokenRequest{
-		ClientId:     this.clientId,
-		ClientSecret: this.clientSecret,
-		GrantType:    GRANT_TYPE_REFRESH_TOKEN,
-		RefreshToken: RefreshToken,
-	}
-	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequest(HTTP_POST, this.getAccessTokenUrl, nil, nil, refreshTokenRequest, getAccessTokenResponse)
-	if err != nil {
-		return nil, err
-	}
-	return NewDotUserTokenInfo(getAccessTokenResponse), nil
-}
-
-type DotUserInfo struct {
-	Id       string `json:"id"`
-	Nickname string `json:"nickname"`
-	Avatar   string `json:"avatar"`
-}
-
-func (this *Client) GetDotUserInfoByUserToken(
-	AccessToken string,
-	TokenType string,
-) (*DotUserInfo, error) {
-	header := make(http.Header)
-	header.Set(HEADER_AUTHORIZATION, fmt.Sprintf("%s %s", TokenType, AccessToken))
-	getUserInfoResponse := &DotUserInfo{}
-	err := this.DoHttpRequest(HTTP_POST, this.getUserInfoUrl, nil, header, nil, getUserInfoResponse)
-	if err != nil {
-		return nil, err
-	}
-	return getUserInfoResponse, nil
-}
-
-func (this *Client) GetDotUser(code string, state string) (*DotUser, error) {
-	userTokenInfo, err := this.GetUserTokenInfo(code)
-	if err != nil {
-		return nil, err
-	}
-	dotUserInfo, err := this.GetDotUserInfoByUserToken(userTokenInfo.AccessToken, userTokenInfo.TokenType)
-	if err != nil {
-		return nil, err
-	}
-	return &DotUser{
-		Id:           dotUserInfo.Id,
-		AccessToken:  userTokenInfo.AccessToken,
-		RefreshToken: userTokenInfo.RefreshToken,
-		ExpiredAt:    userTokenInfo.ExpiredAt,
-		Scopes:       userTokenInfo.Scopes,
-		TokenType:    userTokenInfo.TokenType,
-		Avatar:       dotUserInfo.Avatar,
-		Nickname:     dotUserInfo.Nickname,
-	}, nil
-}
-
-type GetApplicationAccessTokenRequest struct {
-	ClientId     string `json:"client_id"`
-	GrantType    string `json:"grant_type"`
-	ClientSecret string `json:"client_secret"`
-}
-
-func (this *Client) UpdateApplicationAccessToken() error {
-	getAccessTokenRequest := &GetApplicationAccessTokenRequest{
-		ClientId:     this.clientId,
-		GrantType:    GRANT_TYPE_CLIENT_CREDENTIALS,
-		ClientSecret: this.clientSecret,
-	}
-	getAccessTokenResponse := &GetAccessTokenResponse{}
-	err := this.DoHttpRequest(HTTP_POST, this.getAccessTokenUrl, nil, nil, getAccessTokenRequest, getAccessTokenResponse)
-	if err != nil {
-		return err
-	}
-	this.token = getAccessTokenResponse.AccessToken
-	this.tokenType = getAccessTokenResponse.TokenType
-	return nil
-}
-
-type GetUserReceiveAddressRequest struct {
-	UserId   string `json:"user_id"`
-	CoinType string `json:"coin_type"`
-}
-
-type UserReceiveAddress struct {
-	Address     string `json:"address"`
-	Paymail     string `json:"paymail"`
-	CoinType    string `json:"coin_type"`
-	WalletIndex int64  `json:"wallet_index"`
-}
-
-type GetUserReceiveAddressResponse struct {
-	PrimaryWallet *UserReceiveAddress `json:"primary_wallet"`
-	AutopayWallet *UserReceiveAddress `json:"autopay_wallet"`
-}
-
-func (this *Client) GetUserReceiveAddress(id string, coinType string) (*GetUserReceiveAddressResponse, error) {
-	getUserReceiveAddressRequest := &GetUserReceiveAddressRequest{
-		UserId:   id,
-		CoinType: coinType,
-	}
-	getUserReceiveAddressResponse := &GetUserReceiveAddressResponse{}
-	err := this.DoHttpRequestWithToken(
-		HTTP_POST,
-		this.getUserReceiveAddressUrl,
-		nil,
-		nil,
-		getUserReceiveAddressRequest,
-		getUserReceiveAddressResponse,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return getUserReceiveAddressResponse, nil
-}
-
-type ToPoint struct {
-	Type    string `json:"type"`
-	Content string `json:"content"`
-	Amount  int64  `json:"amount"`
-}
-
-type Product struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Detail string `json:"detail"`
-}
-
-type AutoPayRequest struct {
-	OutOrderId string     `json:"out_order_id"`
-	CoinType   string     `json:"coin_type"`
-	UserId     string     `json:"user_id"`
-	Subject    string     `json:"subject"`
-	NotifyUrl  string     `json:"notify_url"`
-	Product    *Product   `json:"product"`
-	To         []*ToPoint `json:"to"`
-}
-
-type AutoPayResponse struct {
-	OrderId    string `json:"order_id"`
-	OutOrderId string `json:"out_order_id"`
-	UserId     string `json:"user_id"`
-	Amount     int64  `json:"amount"`
-	Fee        int64  `json:"fee"`
-	Txid       string `json:"txid"`
-}
-
-func (this *Client) AutoPay(autoPayRequest *AutoPayRequest) (*AutoPayResponse, error) {
-	autoPayResponse := &AutoPayResponse{}
-	err := this.DoHttpRequestWithToken(HTTP_POST, this.autoPayUrl, nil, nil, autoPayRequest, autoPayResponse)
-	if err != nil {
-		return nil, err
-	}
-	return autoPayResponse, nil
-}
-
-func NewClient(
-	host string,
-	clientId string,
-	clientSecret string,
-	redirectUri string,
-) (*Client, error) {
-	client := &Client{
-		host:                     host,
-		clientId:                 clientId,
-		clientSecret:             clientSecret,
-		redirectUri:              redirectUri,
-		getAccessTokenUrl:        fmt.Sprintf("%s%s", host, GET_ACCESS_TOKEN_URI),
-		getUserInfoUrl:           fmt.Sprintf("%s%s", host, GET_USER_INFO_URI),
-		getUserReceiveAddressUrl: fmt.Sprintf("%s%s", host, GET_USER_RECEIVE_ADDRESS_URI),
-		autoPayUrl:               fmt.Sprintf("%s%s", host, AUTOPAY_URI),
-	}
-	err := client.UpdateApplicationAccessToken()
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
+	return
 }
