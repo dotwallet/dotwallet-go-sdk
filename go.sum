@@ -14,8 +14,8 @@ github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4d
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/matryer/respond v1.0.1 h1:RSG07jdn32pH46t4UO1TnpnKlR/ayIpEa4aiK2f9k1U=
 github.com/matryer/respond v1.0.1/go.mod h1:XHpqRsK4LZQgk6twGA/CrtxNBaayoYiKUqj0Mjkj3Hg=
-github.com/mrz1836/go-api-router v0.3.11 h1:9OqWLlZKlDoM+hT+IuHp4Z9yxH9Ao7V1vk9UIrEh2cE=
-github.com/mrz1836/go-api-router v0.3.11/go.mod h1:jLfdTgljLJET/SCHyrOLK0RpeI7TT7d/uEbpq8l2hyQ=
+github.com/mrz1836/go-api-router v0.3.13 h1:6nYZUI6uuNm0aPcLoUAib2Eo79+5IRJh7rxxbBN4hX8=
+github.com/mrz1836/go-api-router v0.3.13/go.mod h1:jLfdTgljLJET/SCHyrOLK0RpeI7TT7d/uEbpq8l2hyQ=
 github.com/mrz1836/go-logger v0.2.5 h1:n4yQKHalut4MYoZsk9pXVf7bIcW9J/vdl9zYJAE67ts=
 github.com/mrz1836/go-logger v0.2.5/go.mod h1:E4gFkyzOlEb2MmaLaTYO0KUKKcsXB1KeMPhcJIGD5F4=
 github.com/mrz1836/go-parameters v0.2.7 h1:vunfOkl4+Cpyi0gqZ2YTpY4GNOHzpG1WiG/SLNjMs0s=
