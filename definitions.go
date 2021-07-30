@@ -14,7 +14,7 @@ const (
 	defaultRefreshTokenExpiresIn        = 7 * 24 * time.Hour             // Default is 7 days (from documentation)
 	defaultRetryCount            int    = 2                              // Default retry count for HTTP requests
 	defaultUserAgent                    = "dotwallet-go-sdk: " + version // Default user agent
-	version                      string = "v0.0.2"                       // dotwallet-go-sdk version
+	version                      string = "v0.0.3"                       // dotwallet-go-sdk version
 
 	// Grants
 	grantTypeAuthorizationCode = "authorization_code"
