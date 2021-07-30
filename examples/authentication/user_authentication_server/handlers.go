@@ -13,7 +13,7 @@ func Handlers() *httprouter.Router {
 	// Create a new router
 	r := apirouter.New()
 
-	// Turned off all CORs - should be accessed outside of a browser
+	// Turned off all CORs - should be accessed outside a browser
 	r.CrossOriginEnabled = false
 	r.CrossOriginAllowCredentials = false
 	r.CrossOriginAllowOriginAll = false
@@ -25,7 +25,7 @@ func Handlers() *httprouter.Router {
 	registerAuthRoutes(r)
 
 	// Return the router
-	return r.HTTPRouter
+	return r.HTTPRouter.Router
 }
 
 // registerBasicRoutes will register basic server related routes
