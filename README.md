@@ -139,7 +139,7 @@ vet                  Run the Go vet application
 
 ## Examples & Tests
 All unit tests and [examples](examples) run via [Github Actions](https://github.com/dotwallet/dotwallet-go-sdk/actions) and
-uses [Go version(s) 1.13.x, 1.14.x and 1.15.x](https://golang.org/doc/go1.15). View the [configuration file](.github/workflows/run-tests.yml).
+uses [Go version 1.16.x](https://golang.org/doc/go1.16). View the [configuration file](.github/workflows/run-tests.yml).
 
 Run all tests (including integration tests)
 ```shell script
@@ -162,7 +162,7 @@ make bench
 <br/>
 
 ## Code Standards
-Read more about this Go project's [code standards](CODE_STANDARDS.md).
+Read more about this Go project's [code standards](.github/CODE_STANDARDS.md).
 
 <br/>
 
@@ -173,14 +173,14 @@ Checkout all the [examples](examples)!
 
 ## Maintainers & Contributors
 | <img src="https://i.imgur.com/sAc5hoe.png" height="50" alt="吴浩瑜" /> | <img src="https://i.imgur.com/sAc5hoe.png" height="50" alt="chenhao" /> | [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) |
-|:---:|:---:|:---:|
-| 吴浩瑜 | chenhao | [MrZ](https://github.com/mrz1836) |
+|:-------------------------------------------------------------------:|:-----------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
+|                                 吴浩瑜                                 |                                 chenhao                                 |                                [MrZ](https://github.com/mrz1836)                                 |
 
 <br/>
 
 ## Contributing
 
-View the [contributing guidelines](CONTRIBUTING.md) and follow the [code of conduct](CODE_OF_CONDUCT.md).
+View the [contributing guidelines](.github/CONTRIBUTING.md) and follow the [code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ### How can I help?
 All kinds of contributions are welcome :raised_hands:!
