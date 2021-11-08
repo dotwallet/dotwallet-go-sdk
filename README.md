@@ -5,7 +5,9 @@
 [![Build Status](https://img.shields.io/github/workflow/status/dotwallet/dotwallet-go-sdk/run-go-tests?logo=github&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/actions)
 [![Report](https://goreportcard.com/badge/github.com/dotwallet/dotwallet-go-sdk?style=flat&v=1)](https://goreportcard.com/report/github.com/dotwallet/dotwallet-go-sdk)
 [![codecov](https://codecov.io/gh/dotwallet/dotwallet-go-sdk/branch/master/graph/badge.svg?v=1)](https://codecov.io/gh/dotwallet/dotwallet-go-sdk)
-[![Go](https://img.shields.io/github/go-mod/go-version/dotwallet/dotwallet-go-sdk?v=1)](https://golang.org/)
+[![Mergify Status](https://img.shields.io/endpoint.svg?url=https://gh.mergify.io/badges/dotwallet/dotwallet-go-sdk&style=flat&v=1)](https://mergify.io)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/dotwallet/dotwallet-go-sdk)
+[![Go](https://img.shields.io/github/go-mod/go-version/dotwallet/dotwallet-go-sdk?v=1)](https://golang.org/)   
 
 <br/>
 
@@ -107,31 +109,36 @@ make help
 
 List of all current commands:
 ```text
-all                  Runs multiple commands
-clean                Remove previous builds and any test cache data
-clean-mods           Remove all the Go mod cache
-coverage             Shows the test coverage
-godocs               Sync the latest tag with GoDocs
-help                 Show this help message
-install              Install the application
-install-go           Install the application (Using Native Go)
-lint                 Run the golangci-lint application (install if not found)
-release              Full production release (creates release in Github)
-release              Runs common.release then runs godocs
-release-snap         Test the full release (build binaries)
-release-test         Full production test release (everything except deploy)
-replace-version      Replaces the version in HTML/JS (pre-deploy)
-tag                  Generate a new tag and push (tag version=0.0.0)
-tag-remove           Remove a tag if found (tag-remove version=0.0.0)
-tag-update           Update an existing tag to current commit (tag-update version=0.0.0)
-test                 Runs vet, lint and ALL tests
-test-ci              Runs all tests via CI (exports coverage)
-test-ci-no-race      Runs all tests via CI (no race) (exports coverage)
-test-ci-short        Runs unit tests via CI (exports coverage)
-test-short           Runs vet, lint and tests (excludes integration tests)
-uninstall            Uninstall the application (and remove files)
-update-linter        Update the golangci-lint package (macOS only)
-vet                  Run the Go vet application
+all                   Runs multiple commands
+clean                 Remove previous builds and any test cache data
+clean-mods            Remove all the Go mod cache
+coverage              Shows the test coverage
+diff                  Show the git diff
+generate              Runs the go generate command in the base of the repo
+godocs                Sync the latest tag with GoDocs
+help                  Show this help message
+install               Install the application
+install-go            Install the application (Using Native Go)
+install-releaser      Install the GoReleaser application
+lint                  Run the golangci-lint application (install if not found)
+release               Full production release (creates release in Github)
+release               Runs common.release then runs godocs
+release-snap          Test the full release (build binaries)
+release-test          Full production test release (everything except deploy)
+replace-version       Replaces the version in HTML/JS (pre-deploy)
+tag                   Generate a new tag and push (tag version=0.0.0)
+tag-remove            Remove a tag if found (tag-remove version=0.0.0)
+tag-update            Update an existing tag to current commit (tag-update version=0.0.0)
+test                  Runs lint and ALL tests
+test-ci               Runs all tests via CI (exports coverage)
+test-ci-no-race       Runs all tests via CI (no race) (exports coverage)
+test-ci-short         Runs unit tests via CI (exports coverage)
+test-no-lint          Runs just tests
+test-short            Runs vet, lint and tests (excludes integration tests)
+test-unit             Runs tests and outputs coverage
+uninstall             Uninstall the application (and remove files)
+update-linter         Update the golangci-lint package (macOS only)
+vet                   Run the Go vet application
 ```
 </details>
 
@@ -186,8 +193,12 @@ View the [contributing guidelines](.github/CONTRIBUTING.md) and follow the [code
 All kinds of contributions are welcome :raised_hands:!
 The most basic way to show your support is to star :star2: the project, or to raise issues :speech_balloon:.
 You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/dotwallet) :clap:!
+
+[![Stars](https://img.shields.io/github/stars/dotwallet/dotwallet-go-sdk?label=Please%20like%20us&style=social)](https://github.com/dotwallet/dotwallet-go-sdk/stargazers)
+
+
 <br/>
 
 ## License
 
-![License](https://img.shields.io/github/license/dotwallet/dotwallet-go-sdk.svg?style=flat&v=1)
+[![License](https://img.shields.io/github/license/dotwallet/dotwallet-go-sdk.svg?style=flat&v=1)](LICENSE)
