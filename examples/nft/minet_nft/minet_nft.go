@@ -15,6 +15,7 @@ func main() {
 			os.Getenv("DOT_WALLET_CLIENT_ID"),
 			os.Getenv("DOT_WALLET_CLIENT_SECRET"),
 		),
+		dotwallet.WithAutoLoadToken(),
 	)
 	if err != nil {
 		log.Fatalln(err)
