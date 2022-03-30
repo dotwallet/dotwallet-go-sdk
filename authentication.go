@@ -133,6 +133,7 @@ func (c *Client) RefreshUserToken(token *DotAccessToken) (*DotAccessToken, error
 
 	// Error?
 	if tokenResponse.Code > 0 {
+		token.RefreshToken = "";
 		return nil, fmt.Errorf(tokenResponse.Message)
 	}
 

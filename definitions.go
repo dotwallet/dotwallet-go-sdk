@@ -27,6 +27,9 @@ const (
 	getUserInfo           = "/" + apiVersion + "/user/get_user_info"
 	getUserReceiveAddress = "/" + apiVersion + "/user/get_user_receive_address"
 
+	getNft           = "/phoenix/user_all/zy_get_nft"
+	mintNft           = "/phoenix/user_all/zy_mint_nft"
+
 	// Headers
 	headerAuthorization = "Authorization"
 
@@ -157,6 +160,20 @@ type userResponse struct {
 	}
 }
 
+type nftResponse struct {
+	genericResponse
+	Data struct {
+		NftData
+	}
+}
+
+type nftMintResponse struct {
+	genericResponse
+	Data struct {
+		NftMintData
+	}
+}
+
 // User is the DotWallet user profile information
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-info
@@ -165,6 +182,17 @@ type User struct {
 	ID               string            `json:"id"`
 	Nickname         string            `json:"nickname"`
 	WebWalletAddress *webWalletAddress `json:"web_wallet_address"`
+}
+
+type NftData struct {
+	CodeHash           string            `json:"code_hash"`
+	Param               string            `json:"param"`
+}
+
+type NftMintData struct {
+	Fee           int64            `json:"fee"`
+	FeeStr               string            `json:"fee_str"`
+	Txid               string            `json:"txid"`
 }
 
 // webWalletAddress is the user's wallet addresses
@@ -180,6 +208,15 @@ type webWalletAddress struct {
 type userReceiveRequest struct {
 	UserID   string   `json:"user_id"`
 	CoinType coinType `json:"coin_type"`
+}
+
+type getNftParam struct {
+	Txid   string   `json:"txid"`
+}
+
+type mintNftParam struct {
+	CodeHash   string   `json:"code_hash"`
+	Param   string   `json:"param"`
 }
 
 // userReceiveAddressResponse is the response from the user receive address request
