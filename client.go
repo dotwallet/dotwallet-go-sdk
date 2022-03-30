@@ -174,6 +174,10 @@ func NewClient(opts ...ClientOps) (*Client, error) {
 		}
 	}
 
+	if err := client.UpdateApplicationAccessToken(); err != nil {
+		return nil, err
+	}
+
 	return client, nil
 }
 
