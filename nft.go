@@ -60,7 +60,6 @@ func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
 
 	// Unmarshal the response
 	resp := new(nftMintResponse)
-	log.Println(string(response.Body))
 	if err = json.Unmarshal(
 		response.Body, &resp,
 	); err != nil {
