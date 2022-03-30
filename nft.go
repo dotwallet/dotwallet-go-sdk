@@ -40,7 +40,7 @@ func (c *Client) GetNft(Txid string) (*NftData, error) {
 	return &resp.Data.NftData, nil
 }
 
-// GetNft can obtain information authorized by DotWallet users via their user access_token
+// MintNft can obtain information authorized by DotWallet users via their user access_token
 func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
 
 	// Make the request
