@@ -14,7 +14,7 @@ const (
 	defaultRefreshTokenExpiresIn        = 7 * 24 * time.Hour             // Default is 7 days (from documentation)
 	defaultRetryCount            int    = 2                              // Default retry count for HTTP requests
 	defaultUserAgent                    = "dotwallet-go-sdk: " + version // Default user agent
-	version                      string = "v0.0.4"                       // dotwallet-go-sdk version
+	version                      string = "v0.0.5"                       // dotwallet-go-sdk version
 
 	// Grants
 	grantTypeAuthorizationCode = "authorization_code"
@@ -27,8 +27,8 @@ const (
 	getUserInfo           = "/" + apiVersion + "/user/get_user_info"
 	getUserReceiveAddress = "/" + apiVersion + "/user/get_user_receive_address"
 
-	getNft           = "/phoenix/user_all/zy_get_nft"
-	mintNft           = "/phoenix/user_all/zy_mint_nft"
+	getNft  = "/phoenix/user_all/zy_get_nft"
+	mintNft = "/phoenix/user_all/zy_mint_nft"
 
 	// Headers
 	headerAuthorization = "Authorization"
@@ -184,15 +184,17 @@ type User struct {
 	WebWalletAddress *webWalletAddress `json:"web_wallet_address"`
 }
 
+// NftData is the NFT data
 type NftData struct {
-	CodeHash           string            `json:"code_hash"`
-	Param               string            `json:"param"`
+	CodeHash string `json:"code_hash"`
+	Param    string `json:"param"`
 }
 
+// NftMintData is the data struct
 type NftMintData struct {
-	Fee           int64            `json:"fee"`
-	FeeStr               string            `json:"fee_str"`
-	Txid               string            `json:"txid"`
+	Fee    int64  `json:"fee"`
+	FeeStr string `json:"fee_str"`
+	Txid   string `json:"txid"`
 }
 
 // webWalletAddress is the user's wallet addresses
@@ -211,12 +213,12 @@ type userReceiveRequest struct {
 }
 
 type getNftParam struct {
-	Txid   string   `json:"txid"`
+	Txid string `json:"txid"`
 }
 
 type mintNftParam struct {
-	CodeHash   string   `json:"code_hash"`
-	Param   string   `json:"param"`
+	CodeHash string `json:"code_hash"`
+	Param    string `json:"param"`
 }
 
 // userReceiveAddressResponse is the response from the user receive address request
