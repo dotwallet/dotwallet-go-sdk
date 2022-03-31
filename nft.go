@@ -32,7 +32,7 @@ func (c *Client) GetNft(Txid string) (*NftData, error) {
 	}
 
 	// Error?
-	if resp.Code > 0 {
+	if resp.Code != 0 {
 		return nil, fmt.Errorf(resp.Message)
 	}
 
@@ -66,7 +66,7 @@ func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
 	}
 
 	// Error?
-	if resp.Code > 0 {
+	if resp.Code != 0 {
 		return nil, fmt.Errorf(resp.Message)
 	}
 
