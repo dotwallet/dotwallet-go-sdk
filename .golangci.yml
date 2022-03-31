@@ -335,7 +335,6 @@ linters:
     - bodyclose
     - revive
     - unconvert
-    - dupl
     - misspell
     - dogsled
     - prealloc
@@ -349,6 +348,7 @@ linters:
   disable:
     - gocritic # use this for very opinionated linting
     - gochecknoglobals
+    - dupl
     - whitespace
     - wsl
     - goerr113
