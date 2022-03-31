@@ -33,5 +33,6 @@ func main() {
 		"fee:", NftMintData.Fee,
 		"fee_str:", NftMintData.FeeStr,
 		"txid:", NftMintData.Txid,
+		"badge_path:", NftMintData.BadgePath,
 	)
 }

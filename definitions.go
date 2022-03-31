@@ -195,6 +195,7 @@ type NftMintData struct {
 	Fee    int64  `json:"fee"`
 	FeeStr string `json:"fee_str"`
 	Txid   string `json:"txid"`
+	BadgePath []string            `json:"badge_path"`
 }
 
 // webWalletAddress is the user's wallet addresses
