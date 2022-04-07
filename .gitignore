@@ -39,3 +39,9 @@ example/example
 *log
 example/config_test.json
 old-files
+
+*tmp*
+
+examples/chain/get_msgtx/get_msgtx
+examples/chain/merkle/merkle
+examples/nft/verify_nft/verify_nft
