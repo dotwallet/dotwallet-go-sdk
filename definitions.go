@@ -28,8 +28,9 @@ const (
 	getUserInfo           = "/" + apiVersion + "/user/get_user_info"
 	getUserReceiveAddress = "/" + apiVersion + "/user/get_user_receive_address"
 
-	getNft  = "/phoenix/user_all/zy_get_nft"
-	mintNft = "/phoenix/user_all/zy_mint_nft"
+	getNft               = "/phoenix/user_all/zy_get_nft"
+	mintNft              = "/phoenix/user_all/zy_mint_nft"
+	TransferNftToAddress = "/phoenix/user_all/zy_transfer_nft_to_address"
 
 	getMerkleProof    = "/phoenix/public/get_merkle_proof"
 	getRawtransaction = "/phoenix/public/get_rawtransaction"
@@ -185,6 +186,13 @@ type nftMintResponse struct {
 	}
 }
 
+type transferNftToAddressResponse struct {
+	genericResponse
+	Data struct {
+		TransferNftToAddressData
+	}
+}
+
 // User is the DotWallet user profile information
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-info
@@ -203,10 +211,15 @@ type NftData struct {
 
 // NftMintData is the data struct
 type NftMintData struct {
-	Fee    int64  `json:"fee"`
-	FeeStr string `json:"fee_str"`
-	Txid   string `json:"txid"`
-	BadgePath []string            `json:"badge_path"`
+	Fee       int64    `json:"fee"`
+	FeeStr    string   `json:"fee_str"`
+	Txid      string   `json:"txid"`
+	BadgePath []string `json:"badge_path"`
+}
+
+type TransferNftToAddressData struct {
+	Fee       int64    `json:"fee"`
+	FeeStr    string   `json:"fee_str"`
 }
 
 // webWalletAddress is the user's wallet addresses
@@ -231,6 +244,14 @@ type getNftParam struct {
 type mintNftParam struct {
 	CodeHash string `json:"code_hash"`
 	Param    string `json:"param"`
+}
+
+type transferNftToAddressParam struct {
+	Txid    string `json:"txid"`
+	Address string `json:"address"`
+	Name    string `json:"name"`
+	Desc    string `json:"desc"`
+	PicUrl  string `json:"pic_url"`
 }
 
 // userReceiveAddressResponse is the response from the user receive address request

@@ -83,6 +83,43 @@ func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
 	return &resp.Data.NftMintData, nil
 }
 
+// MintNft can obtain information authorized by DotWallet users via their user access_token
+func (c *Client) TransferNftToAddress(Txid string, Address string, Name string, Desc string, PicUrl string) (*TransferNftToAddressData, error) {
+
+	// Make the request
+	response, err := c.Request(
+		http.MethodPost,
+		TransferNftToAddress,
+		&transferNftToAddressParam{
+			Txid:    Txid,
+			Address: Address,
+			Name:    Name,
+			Desc:    Desc,
+			PicUrl:  PicUrl,
+		},
+		http.StatusOK,
+		c.Token(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal the response
+	resp := new(transferNftToAddressResponse)
+	if err = json.Unmarshal(
+		response.Body, &resp,
+	); err != nil {
+		return nil, err
+	}
+
+	// Error?
+	if resp.Code != 0 {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
+	return &resp.Data.TransferNftToAddressData, nil
+}
+
 func ParseNftVoutScript(pkScript []byte) (btcutil.Address, error) {
 	if len(pkScript) != NFT_VOUT_LEN {
 		return nil, errors.New("not nft vout")
