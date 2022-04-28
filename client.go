@@ -252,8 +252,8 @@ func (c *Client) Request(httpMethod string, requestEndpoint string,
 			if err = c.UpdateApplicationAccessToken(); err != nil {
 				return
 			}
+			authorization = c.options.token
 		}
-
 		// Set the header authorization for the application
 		req.Header.Set(headerAuthorization, authorization.TokenType+" "+authorization.AccessToken)
 	} else if authorization != nil && len(authorization.RefreshToken) > 0 {
@@ -265,6 +265,7 @@ func (c *Client) Request(httpMethod string, requestEndpoint string,
 			if authorization, err = c.RefreshUserToken(authorization); err != nil {
 				return
 			}
+			authorization = c.options.token
 		}
 
 		// Set the header authorization for the application
@@ -283,15 +284,35 @@ func (c *Client) Request(httpMethod string, requestEndpoint string,
 	switch httpMethod {
 	case http.MethodPost:
 		resp, err = req.Post(c.options.host + requestEndpoint)
-	// case http.MethodPut:
-	// 	resp, err = req.Put(c.options.host + requestEndpoint)
-	// case http.MethodDelete:
-	// 	resp, err = req.Delete(c.options.host + requestEndpoint)
 	case http.MethodGet:
 		resp, err = req.Get(c.options.host + requestEndpoint)
 	}
 	if err != nil {
 		return
+	}
+
+	// If the token expires, try again
+	if authorization != nil {
+		respCheck := new(genericResponse)
+		if err = json.Unmarshal(
+			resp.Body(), &respCheck,
+		); err == nil && respCheck.Code == 75000 {
+			if err = c.UpdateApplicationAccessToken(); err != nil {
+				return
+			}
+			authorization = c.options.token
+			req.Header.Set(headerAuthorization, authorization.TokenType+" "+authorization.AccessToken)
+
+			switch httpMethod {
+			case http.MethodPost:
+				resp, err = req.Post(c.options.host + requestEndpoint)
+			case http.MethodGet:
+				resp, err = req.Get(c.options.host + requestEndpoint)
+			}
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	// Start the response
