@@ -9,5 +9,5 @@ require (
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mrz1836/go-api-router v0.4.13
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 )
