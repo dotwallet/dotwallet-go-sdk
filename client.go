@@ -262,7 +262,7 @@ func (c *Client) Request(httpMethod string, requestEndpoint string,
 		if c.IsTokenExpired(authorization) {
 
 			// Try to update the access token first
-			if authorization, err = c.RefreshUserToken(authorization); err != nil {
+			if _, err = c.RefreshUserToken(authorization); err != nil {
 				return
 			}
 			authorization = c.options.token

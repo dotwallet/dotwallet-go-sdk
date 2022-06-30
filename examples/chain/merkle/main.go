@@ -23,7 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if c.VerifyMerkleProof(merkelProof.TxOrId, merkelProof.Index, merkelProof.Nodes, merkelProof.Target.Merkleroot) {
+	if c.VerifyMerkleProof(merkelProof.TxOrID, merkelProof.Index, merkelProof.Nodes, merkelProof.Target.Merkleroot) {
 		log.Println(true)
 		return
 	}

@@ -32,7 +32,7 @@ func main() {
 	log.Println(
 		"fee:", NftMintData.Fee,
 		"fee_str:", NftMintData.FeeStr,
-		"txid:", NftMintData.Txid,
+		"txid:", NftMintData.TxID,
 		"badge_path:", NftMintData.BadgePath,
 	)
 }

@@ -11,39 +11,43 @@ import (
 	"github.com/btcsuite/btcd/wire"
 )
 
-func (c *Client) GetMerkleProof(txhash *chainhash.Hash) (*MerkelProof, error) {
-	return c.GetMerkleProofByHashStr(txhash.String())
+// GetMerkleProof get merkle proof
+func (c *Client) GetMerkleProof(txHash *chainhash.Hash) (*MerkelProof, error) {
+	return c.GetMerkleProofByHashStr(txHash.String())
 }
 
-func (c *Client) GetMerkleProofByHashStr(txid string) (*MerkelProof, error) {
+// GetMerkleProofByHashStr get merkle proof by hash string
+func (c *Client) GetMerkleProofByHashStr(txID string) (*MerkelProof, error) {
 	getMerkleProofRequest := &GetMerkleProofRequest{
-		Txid: txid,
+		Txid: txID,
 	}
 	response, err := c.Request(http.MethodPost, getMerkleProof, getMerkleProofRequest, http.StatusOK, nil)
 	if err != nil {
 		return nil, err
 	}
 	getMerkleProofResponse := &GetMerkleProofResponse{}
-	err = json.Unmarshal(response.Body, getMerkleProofResponse)
-	if err != nil {
+	if err = json.Unmarshal(
+		response.Body, getMerkleProofResponse,
+	); err != nil {
 		return nil, err
 	}
 	return &getMerkleProofResponse.Data.MerkelProof, nil
 }
 
-func (c *Client) VerifyMerkleProof(txid string, nIndex int, nodes []string, exceptMerkleRoot string) bool {
-	hash, err := chainhash.NewHashFromStr(txid)
+// VerifyMerkleProof verify merkle proof
+func (c *Client) VerifyMerkleProof(txID string, nIndex int, nodes []string, exceptMerkleRoot string) bool {
+	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
 		return false
 	}
+	var peerHash *chainhash.Hash
 	for i := 0; i < len(nodes); i, nIndex = i+1, nIndex>>1 {
 		node := nodes[i]
 		if node == "*" {
 			hash = blockchain.HashMerkleBranches(hash, hash)
 			continue
 		}
-		peerHash, err := chainhash.NewHashFromStr(node)
-		if err != nil {
+		if peerHash, err = chainhash.NewHashFromStr(node); err != nil {
 			return false
 		}
 		if nIndex&1 != 0 {
@@ -55,44 +59,49 @@ func (c *Client) VerifyMerkleProof(txid string, nIndex int, nodes []string, exce
 	return hash.String() == exceptMerkleRoot
 }
 
+// DeserializeRawTx deserialize the raw tx
 func (c *Client) DeserializeRawTx(rawTx string) (*wire.MsgTx, error) {
 	serializedTx, err := hex.DecodeString(rawTx)
 	if err != nil {
 		return nil, err
 	}
-	msgtx := wire.NewMsgTx(2)
-	err = msgtx.Deserialize(bytes.NewReader(serializedTx))
-	if err != nil {
+	msgTx := wire.NewMsgTx(2)
+	if err = msgTx.Deserialize(bytes.NewReader(serializedTx)); err != nil {
 		return nil, err
 	}
-	return msgtx, nil
+	return msgTx, nil
 }
 
+// SerializeRawTx serialize the raw tx
 func (c *Client) SerializeRawTx(tx *wire.MsgTx) string {
 	buf := make([]byte, 0, tx.SerializeSize())
 	buff := bytes.NewBuffer(buf)
-	tx.Serialize(buff)
-	rawtxByte := buff.Bytes()
-	rawtx := hex.EncodeToString(rawtxByte)
-	return rawtx
+	_ = tx.Serialize(buff) // TODO: capture this error?
+	return hex.EncodeToString(buff.Bytes())
 }
 
-func (c *Client) GetMsgTxByStr(txid string) (*wire.MsgTx, error) {
-	getRawtransactionRequest := &GetRawTransactionRequest{
-		Txid: txid,
+// GetMsgTxByStr get message tx by string
+func (c *Client) GetMsgTxByStr(txID string) (*wire.MsgTx, error) {
+	getRawTransactionRequest := &GetRawTransactionRequest{
+		TxID: txID,
 	}
-	response, err := c.Request(http.MethodPost, getRawtransaction, getRawtransactionRequest, http.StatusOK, nil)
+	response, err := c.Request(
+		http.MethodPost, getRawTransaction,
+		getRawTransactionRequest, http.StatusOK, nil,
+	)
 	if err != nil {
 		return nil, err
 	}
 	getRawTransactionResponse := &GetRawTransactionResponse{}
-	err = json.Unmarshal(response.Body, getRawTransactionResponse)
-	if err != nil {
+	if err = json.Unmarshal(
+		response.Body, getRawTransactionResponse,
+	); err != nil {
 		return nil, err
 	}
 	return c.DeserializeRawTx(getRawTransactionResponse.Data.RawTx)
 }
 
+// GetMsgTx get message tx
 func (c *Client) GetMsgTx(hash *chainhash.Hash) (*wire.MsgTx, error) {
 	return c.GetMsgTxByStr(hash.String())
 }

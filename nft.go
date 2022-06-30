@@ -17,14 +17,14 @@ import (
 )
 
 // GetNft can obtain information authorized by DotWallet users via their user access_token
-func (c *Client) GetNft(Txid string) (*NftData, error) {
+func (c *Client) GetNft(txID string) (*NftData, error) {
 
 	// Make the request
 	response, err := c.Request(
 		http.MethodPost,
 		getNft,
 		&getNftParam{
-			Txid: Txid,
+			TxID: txID,
 		},
 		http.StatusOK,
 		c.Token(),
@@ -50,15 +50,15 @@ func (c *Client) GetNft(Txid string) (*NftData, error) {
 }
 
 // MintNft can obtain information authorized by DotWallet users via their user access_token
-func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
+func (c *Client) MintNft(codeHash string, param string) (*NftMintData, error) {
 
 	// Make the request
 	response, err := c.Request(
 		http.MethodPost,
 		mintNft,
 		&mintNftParam{
-			CodeHash: CodeHash,
-			Param:    Param,
+			CodeHash: codeHash,
+			Param:    param,
 		},
 		http.StatusOK,
 		c.Token(),
@@ -83,19 +83,20 @@ func (c *Client) MintNft(CodeHash string, Param string) (*NftMintData, error) {
 	return &resp.Data.NftMintData, nil
 }
 
-// MintNft can obtain information authorized by DotWallet users via their user access_token
-func (c *Client) TransferNftToAddress(Txid string, Address string, Name string, Desc string, PicUrl string) (*TransferNftToAddressData, error) {
+// TransferNftToAddress can obtain information authorized by DotWallet users via their user access_token
+func (c *Client) TransferNftToAddress(txID string, address string, name string,
+	description string, picURL string) (*TransferNftToAddressData, error) {
 
 	// Make the request
 	response, err := c.Request(
 		http.MethodPost,
-		TransferNftToAddress,
+		transferNftToAddress,
 		&transferNftToAddressParam{
-			Txid:    Txid,
-			Address: Address,
-			Name:    Name,
-			Desc:    Desc,
-			PicUrl:  PicUrl,
+			TxID:    txID,
+			Address: address,
+			Name:    name,
+			Desc:    description,
+			PicURL:  picURL,
 		},
 		http.StatusOK,
 		c.Token(),
@@ -120,20 +121,22 @@ func (c *Client) TransferNftToAddress(Txid string, Address string, Name string, 
 	return &resp.Data.TransferNftToAddressData, nil
 }
 
+// ParseNftVoutScript will parse th NFT script
 func ParseNftVoutScript(pkScript []byte) (btcutil.Address, error) {
-	if len(pkScript) != NFT_VOUT_LEN {
+	if len(pkScript) != NftVoutLen {
 		return nil, errors.New("not nft vout")
 	}
-	if !bytes.HasPrefix(pkScript, NFT_VOUT_SCRIPT_PREFIX) {
+	if !bytes.HasPrefix(pkScript, NftVoutScriptPrefix) {
 		return nil, errors.New("not nft vout")
 	}
-	addr, err := btcutil.NewAddressPubKeyHash(pkScript[NFT_VOUT_LEN-20:], &chaincfg.MainNetParams)
+	addr, err := btcutil.NewAddressPubKeyHash(pkScript[NftVoutLen-20:], &chaincfg.MainNetParams)
 	if err != nil {
 		return nil, err
 	}
 	return addr, nil
 }
 
+// VerifyCastingNftTransactionByRawTx will verify the casting
 func (c *Client) VerifyCastingNftTransactionByRawTx(rawTx string) (bool, error) {
 	msgTx, err := c.DeserializeRawTx(rawTx)
 	if err != nil {
@@ -142,14 +145,16 @@ func (c *Client) VerifyCastingNftTransactionByRawTx(rawTx string) (bool, error) 
 	return c.VerifyCastingNftTransaction(msgTx)
 }
 
-func (c *Client) VerifyCastingNftTransactionByTxid(txid string) (bool, error) {
-	msgTx, err := c.GetMsgTxByStr(txid)
+// VerifyCastingNftTransactionByTxid get by tx id
+func (c *Client) VerifyCastingNftTransactionByTxid(txID string) (bool, error) {
+	msgTx, err := c.GetMsgTxByStr(txID)
 	if err != nil {
 		return false, err
 	}
 	return c.VerifyCastingNftTransaction(msgTx)
 }
 
+// VerifyCastingNftTransaction verify the tx
 func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 	nftVinCount := 0
 	for _, vin := range msgTx.TxIn {
@@ -157,12 +162,12 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 			continue
 		}
 
-		datas, err := txscript.PushedData(vin.SignatureScript)
+		pushData, err := txscript.PushedData(vin.SignatureScript)
 		if err != nil {
 			return false, err
 		}
 
-		if len(datas) != NFT_VIN_PUSHED_DATA_COUNT {
+		if len(pushData) != NftVinPushedDataCount {
 			continue
 		}
 
@@ -180,7 +185,7 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 
 	nftVoutCount := 0
 	continuity := true
-	var opReturnScript []byte = nil
+	var opReturnScript []byte
 	for index, vout := range msgTx.TxOut {
 		if bytes.HasPrefix(vout.PkScript, []byte{0x00, 0x6a}) {
 			opReturnScript = vout.PkScript
@@ -199,32 +204,35 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 		return false, nil
 	}
 
-	datas, err := txscript.PushedData(opReturnScript)
+	pushData, err := txscript.PushedData(opReturnScript)
 	if err != nil {
-		return false, nil
+		return false, nil // nolint: nilerr // returning bool instead
 	}
-	if len(datas) != 2 {
+	if len(pushData) != 2 {
 		return false, nil
 	}
 
 	nftAuthInfo := &NftAuthInfo{}
-	err = json.Unmarshal(datas[1], nftAuthInfo)
+	err = json.Unmarshal(pushData[1], nftAuthInfo)
 	if err != nil {
-		return false, nil
+		return false, nil // nolint: nilerr // returning bool instead
 	}
 
-	sig, err := btcec.ParseSignature(nftAuthInfo.Sig, btcec.S256())
+	var sig *btcec.Signature
+	sig, err = btcec.ParseSignature(nftAuthInfo.Sig, btcec.S256())
 	if err != nil {
 		panic(err)
 	}
-	pub, err := btcec.ParsePubKey(nftAuthInfo.Pub, btcec.S256())
+
+	var pub *btcec.PublicKey
+	pub, err = btcec.ParsePubKey(nftAuthInfo.Pub, btcec.S256())
 	if err != nil {
 		panic(err)
 	}
-	hasher := sha256.New()
+	hashing := sha256.New()
 	key := fmt.Sprintf("%s:%d", msgTx.TxIn[0].PreviousOutPoint.Hash.String(), msgTx.TxIn[0].PreviousOutPoint.Index)
-	hasher.Write([]byte(key))
-	keyHash := hasher.Sum(nil)
+	hashing.Write([]byte(key))
+	keyHash := hashing.Sum(nil)
 	ok := sig.Verify(
 		keyHash,
 		pub,
@@ -235,24 +243,25 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 	return true, nil
 }
 
+// VerifyNftCastingOpReturn verify the op return
 func (c *Client) VerifyNftCastingOpReturn(msgTx *wire.MsgTx) bool {
-	var opReturnScript []byte = nil
+	var opReturnScript []byte
 	for _, vout := range msgTx.TxOut {
 		if bytes.HasPrefix(vout.PkScript, []byte{0x00, 0x6a}) {
 			opReturnScript = vout.PkScript
 			break
 		}
 	}
-	datas, err := txscript.PushedData(opReturnScript)
+	pushData, err := txscript.PushedData(opReturnScript)
 	if err != nil {
 		return false
 	}
-	if len(datas) != 2 {
+	if len(pushData) != 2 {
 		return false
 	}
 
 	nftAuthInfo := &NftAuthInfo{}
-	err = json.Unmarshal(datas[1], nftAuthInfo)
+	err = json.Unmarshal(pushData[1], nftAuthInfo)
 	if err != nil {
 		return false
 	}
@@ -265,28 +274,27 @@ func (c *Client) VerifyNftCastingOpReturn(msgTx *wire.MsgTx) bool {
 	if err != nil {
 		return false
 	}
-	hasher := sha256.New()
+	hashing := sha256.New()
 	key := fmt.Sprintf("%s:%d", msgTx.TxIn[0].PreviousOutPoint.Hash.String(), msgTx.TxIn[0].PreviousOutPoint.Index)
-	hasher.Write([]byte(key))
-	keyHash := hasher.Sum(nil)
+	hashing.Write([]byte(key))
+	keyHash := hashing.Sum(nil)
 	ok := sig.Verify(
 		keyHash,
 		pub,
 	)
-	if !ok {
-		return false
-	}
-	return true
+	return ok
 }
 
-func (c *Client) GetNftReceiveAddressesByTxidStr(txid string) ([]*AddressBadgeCodePair, error) {
-	msgTx, err := c.GetMsgTxByStr(txid)
+// GetNftReceiveAddressesByTxidStr get address by tx id
+func (c *Client) GetNftReceiveAddressesByTxidStr(txID string) ([]*AddressBadgeCodePair, error) {
+	msgTx, err := c.GetMsgTxByStr(txID)
 	if err != nil {
 		return nil, err
 	}
 	return c.GetNftReceiveAddresses(msgTx)
 }
 
+// GetNftReceiveAddresses get nft addresses
 func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodePair, error) {
 	l := list.New()
 	l.PushBack(msgTx)
@@ -296,8 +304,8 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 		l.Remove(elem)
 		currentMsgTx := elem.Value.(*wire.MsgTx)
 		nftTxInfo := &NftTxInfo{
-			Txid:            currentMsgTx.TxHash().String(),
-			NftPreOutPoints: make([]*TxidIndexPair, 0, 1),
+			TxID:            currentMsgTx.TxHash().String(),
+			NftPreOutPoints: make([]*TxIDIndexPair, 0, 1),
 			NftOutPoints:    make([]*AddressIndexPair, 0, 8),
 			Type:            -1,
 		}
@@ -307,12 +315,12 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 				continue
 			}
 
-			datas, err := txscript.PushedData(vin.SignatureScript)
+			pushData, err := txscript.PushedData(vin.SignatureScript)
 			if err != nil {
 				return nil, err
 			}
 
-			if len(datas) != NFT_VIN_PUSHED_DATA_COUNT {
+			if len(pushData) != NftVinPushedDataCount {
 				continue
 			}
 
@@ -325,8 +333,8 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 			if err != nil {
 				continue
 			}
-			txidIndexPair := &TxidIndexPair{
-				Txid:  vin.PreviousOutPoint.Hash.String(),
+			txidIndexPair := &TxIDIndexPair{
+				TxID:  vin.PreviousOutPoint.Hash.String(),
 				Index: int(vin.PreviousOutPoint.Index),
 			}
 			nftTxInfo.NftPreOutPoints = append(nftTxInfo.NftPreOutPoints, txidIndexPair)
@@ -352,35 +360,35 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 		}
 
 		if len(nftTxInfo.NftPreOutPoints) == 0 && len(nftTxInfo.NftOutPoints) == 0 {
-			nftTxInfo.Type = NFT_TX_TYPE_IRRELEVANT
+			nftTxInfo.Type = NftTxTypeIrrelevant
 			break
 		}
 
 		if len(nftTxInfo.NftPreOutPoints) == 0 && len(nftTxInfo.NftOutPoints) > 0 {
-			//casting
+			// casting
 			if !continuity || !c.VerifyNftCastingOpReturn(currentMsgTx) {
-				nftTxInfo.Type = NFT_TX_TYPE_ERROR
+				nftTxInfo.Type = NftTxTypeError
 				break
 			}
-			nftTxInfo.Type = NFT_TX_TYPE_CASTING
+			nftTxInfo.Type = NftTxTypeCasting
 			break
 		}
 
 		if len(nftTxInfo.NftPreOutPoints) == 1 && len(nftTxInfo.NftOutPoints) == 0 {
-			//destory
-			nftTxInfo.Type = NFT_TX_TYPE_DESTORY
+			// destroy
+			nftTxInfo.Type = NftTxTypeDestroy
 			break
 		}
 
 		if len(nftTxInfo.NftPreOutPoints) == 1 && len(nftTxInfo.NftOutPoints) == 1 {
-			//transfer
-			nftTxInfo.Type = NFT_TX_TYPE_TRANSFER
+			// transfer
+			nftTxInfo.Type = NftTxTypeTransfer
 			continue
 		}
 
 		if len(nftTxInfo.NftPreOutPoints) > 1 {
-			//destory
-			nftTxInfo.Type = NFT_TX_TYPE_DESTORY
+			// destroy
+			nftTxInfo.Type = NftTxTypeDestroy
 			break
 		}
 	}
@@ -391,8 +399,8 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 	}
 
 	firstNftTxInfo := nftTxInfos[nftTxInfosCount-1]
-	//追回去的第一笔
-	if firstNftTxInfo.Type != NFT_TX_TYPE_CASTING {
+	// 追回去的第一笔
+	if firstNftTxInfo.Type != NftTxTypeCasting {
 		return []*AddressBadgeCodePair{}, nil
 	}
 
@@ -401,7 +409,7 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 		for _, nftOutPoint := range firstNftTxInfo.NftOutPoints {
 			addressBadgeCodePair := &AddressBadgeCodePair{
 				Address:   nftOutPoint.Address,
-				BadgeCode: fmt.Sprintf("%s_%d", firstNftTxInfo.Txid, nftOutPoint.Index+1),
+				BadgeCode: fmt.Sprintf("%s_%d", firstNftTxInfo.TxID, nftOutPoint.Index+1),
 			}
 			result = append(result, addressBadgeCodePair)
 		}
@@ -413,7 +421,7 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 		return nil, errors.New("secondNftTxInfo.NftPreOutPoints should be 1")
 	}
 
-	badgeCode := fmt.Sprintf("%s_%d", firstNftTxInfo.Txid, secondNftTxInfo.NftPreOutPoints[0].Index+1)
+	badgeCode := fmt.Sprintf("%s_%d", firstNftTxInfo.TxID, secondNftTxInfo.NftPreOutPoints[0].Index+1)
 
 	lastNftTxInfo := nftTxInfos[0]
 
