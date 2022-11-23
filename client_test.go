@@ -283,7 +283,7 @@ func ExampleNewClient() {
 		return
 	}
 	fmt.Printf("loaded client: %s", client.options.userAgent)
-	// Output:loaded client: dotwallet-go-sdk: v0.0.6
+	// Output:loaded client: dotwallet-go-sdk: v0.1.0
 }
 
 // BenchmarkNewClient benchmarks the method NewClient()

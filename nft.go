@@ -206,7 +206,7 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 
 	pushData, err := txscript.PushedData(opReturnScript)
 	if err != nil {
-		return false, nil // nolint: nilerr // returning bool instead
+		return false, nil //nolint:nilerr // returning bool instead
 	}
 	if len(pushData) != 2 {
 		return false, nil
@@ -215,7 +215,7 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 	nftAuthInfo := &NftAuthInfo{}
 	err = json.Unmarshal(pushData[1], nftAuthInfo)
 	if err != nil {
-		return false, nil // nolint: nilerr // returning bool instead
+		return false, nil //nolint:nilerr // returning bool instead
 	}
 
 	var sig *btcec.Signature
