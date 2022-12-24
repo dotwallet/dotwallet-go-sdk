@@ -2,7 +2,7 @@
 > A golang client for the [DotWallet](https://dotwallet.com) [API](https://developers.dotwallet.com/documents/en/#intro)
 
 [![Release](https://img.shields.io/github/release-pre/dotwallet/dotwallet-go-sdk.svg?logo=github&style=flat&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/dotwallet/dotwallet-go-sdk/run-go-tests?logo=github&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/dotwallet/dotwallet-go-sdk/run-tests.yml?branch=master&logo=github&v=1)](https://github.com/dotwallet/dotwallet-go-sdk/actions)
 [![Report](https://goreportcard.com/badge/github.com/dotwallet/dotwallet-go-sdk?style=flat&v=1)](https://goreportcard.com/report/github.com/dotwallet/dotwallet-go-sdk)
 [![codecov](https://codecov.io/gh/dotwallet/dotwallet-go-sdk/branch/master/graph/badge.svg?v=1)](https://codecov.io/gh/dotwallet/dotwallet-go-sdk)
 [![Mergify Status](https://img.shields.io/endpoint.svg?url=https://api.mergify.com/v1/badges/dotwallet/dotwallet-go-sdk&style=flat&v=1)](https://mergify.io)
