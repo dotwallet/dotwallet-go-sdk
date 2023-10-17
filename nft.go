@@ -157,7 +157,7 @@ func (c *Client) VerifyCastingNftTransactionByTxid(txID string) (bool, error) {
 // VerifyCastingNftTransaction verify the tx
 func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 	nftVinCount := 0
-	for _, vin := range msgTx.TxIn {
+	for i, vin := range msgTx.TxIn {
 		if !txscript.IsPushOnlyScript(vin.SignatureScript) {
 			continue
 		}
@@ -171,7 +171,8 @@ func (c *Client) VerifyCastingNftTransaction(msgTx *wire.MsgTx) (bool, error) {
 			continue
 		}
 
-		preMsgTx, err := c.GetMsgTx(&vin.PreviousOutPoint.Hash)
+		var preMsgTx *wire.MsgTx
+		preMsgTx, err = c.GetMsgTx(&msgTx.TxIn[i].PreviousOutPoint.Hash)
 		if err != nil {
 			return false, err
 		}
@@ -310,7 +311,7 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 			Type:            -1,
 		}
 		nftTxInfos = append(nftTxInfos, nftTxInfo)
-		for _, vin := range currentMsgTx.TxIn {
+		for i, vin := range currentMsgTx.TxIn {
 			if !txscript.IsPushOnlyScript(vin.SignatureScript) {
 				continue
 			}
@@ -324,7 +325,8 @@ func (c *Client) GetNftReceiveAddresses(msgTx *wire.MsgTx) ([]*AddressBadgeCodeP
 				continue
 			}
 
-			preMsgTx, err := c.GetMsgTx(&vin.PreviousOutPoint.Hash)
+			var preMsgTx *wire.MsgTx
+			preMsgTx, err = c.GetMsgTx(&currentMsgTx.TxIn[i].PreviousOutPoint.Hash)
 			if err != nil {
 				return nil, err
 			}
