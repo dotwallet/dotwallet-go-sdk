@@ -15,7 +15,7 @@ const (
 	defaultRefreshTokenExpiresIn        = 7 * 24 * time.Hour             // Default is 7 days (from documentation)
 	defaultRetryCount            int    = 2                              // Default retry count for HTTP requests
 	defaultUserAgent                    = "dotwallet-go-sdk: " + version // Default user agent
-	version                      string = "v0.1.0"                       // dotwallet-go-sdk version
+	version                      string = "v0.2.0"                       // dotwallet-go-sdk version
 
 	// Grants
 	grantTypeAuthorizationCode = "authorization_code"
@@ -155,7 +155,7 @@ type DotAccessToken struct {
 // accessTokenResponse is the response from creating the new access token
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-authorization
-type accessTokenResponse struct {
+type accessTokenResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		AccessToken  string `json:"access_token"`            // Access token from the API
@@ -169,28 +169,28 @@ type accessTokenResponse struct {
 // userResponse is the response from the user info request
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-info
-type userResponse struct {
+type userResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		User
 	}
 }
 
-type nftResponse struct {
+type nftResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		NftData
 	}
 }
 
-type nftMintResponse struct {
+type nftMintResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		NftMintData
 	}
 }
 
-type transferNftToAddressResponse struct {
+type transferNftToAddressResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		TransferNftToAddressData
@@ -262,7 +262,7 @@ type transferNftToAddressParam struct {
 // userReceiveAddressResponse is the response from the user receive address request
 //
 // For more information: https://developers.dotwallet.com/documents/en/#get-user-receive-address
-type userReceiveAddressResponse struct {
+type userReceiveAddressResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		Wallets
@@ -314,7 +314,7 @@ type MerkelProof struct {
 }
 
 // GetMerkleProofResponse is the response
-type GetMerkleProofResponse struct {
+type GetMerkleProofResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		MerkelProof
@@ -342,7 +342,7 @@ type MsgTxInfo struct {
 }
 
 // GetRawTransactionResponse is the response
-type GetRawTransactionResponse struct {
+type GetRawTransactionResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
 	genericResponse
 	Data struct {
 		MsgTxInfo
