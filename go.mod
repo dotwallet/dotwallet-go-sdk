@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/mrz1836/go-api-router v0.6.4
+	github.com/mrz1836/go-api-router v0.7.0
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/matryer/respond v1.0.1 // indirect
 	github.com/mrz1836/go-logger v0.3.2 // indirect
 	github.com/mrz1836/go-parameters v0.4.1 // indirect
-	github.com/newrelic/go-agent/v3 v3.28.0 // indirect
+	github.com/newrelic/go-agent/v3 v3.28.1 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
