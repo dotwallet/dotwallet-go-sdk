@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/btcsuite/btcd v0.23.4
 	github.com/btcsuite/btcutil v1.0.2
-	github.com/go-resty/resty/v2 v2.10.0
+	github.com/go-resty/resty/v2 v2.11.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mrz1836/go-api-router v0.7.0
