@@ -9,6 +9,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // newTestClient will return a client for testing purposes
@@ -52,7 +53,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials("", testClientSecret),
 			WithCustomHTTPClient(customHTTPClient),
 		)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, newClient)
 	})
 
@@ -65,18 +66,18 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, ""),
 			WithCustomHTTPClient(customHTTPClient),
 		)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, newClient)
 	})
 
 	t.Run("test client, get access token, defaults", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c.options.token)
 
 		assert.Equal(t, defaultHTTPTimeout, c.options.httpTimeout)
@@ -102,7 +103,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, testClientSecret),
 			WithCustomHTTPClient(customHTTPClient),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 	})
 
@@ -111,7 +112,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, testClientSecret),
 			WithHTTPTimeout(15*time.Second),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 		assert.Equal(t, 15*time.Second, newClient.options.httpTimeout)
 	})
@@ -121,7 +122,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, testClientSecret),
 			WithHost(testHost),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 		assert.Equal(t, testHost, newClient.options.host)
 	})
@@ -131,7 +132,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, testClientSecret),
 			WithRetryCount(4),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 		assert.Equal(t, 4, newClient.options.retryCount)
 	})
@@ -141,7 +142,7 @@ func TestNewClient(t *testing.T) {
 			WithCredentials(testClientID, testClientSecret),
 			WithUserAgent("custom-user-agent"),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 		assert.Equal(t, "custom-user-agent", newClient.options.userAgent)
 	})
@@ -159,9 +160,9 @@ func TestNewClient(t *testing.T) {
 			WithCustomHTTPClient(customHTTPClient),
 			WithCustomHeaders(headers),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, client)
-		assert.Equal(t, 2, len(client.options.customHeaders))
+		assert.Len(t, client.options.customHeaders, 2)
 		assert.Equal(t, []string{"value_1"}, client.options.customHeaders["custom_header_1"])
 	})
 
@@ -176,7 +177,7 @@ func TestNewClient(t *testing.T) {
 			WithCustomHTTPClient(customHTTPClient),
 			WithAutoLoadToken(),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, client)
 		assert.NotNil(t, client.Token())
 	})
@@ -192,7 +193,7 @@ func TestNewClient(t *testing.T) {
 			WithCustomHTTPClient(customHTTPClient),
 			WithAutoLoadToken(),
 		)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, client)
 		assert.Nil(t, client.Token())
 	})
@@ -208,7 +209,7 @@ func TestNewClient(t *testing.T) {
 				TokenType:   testTokenType,
 			}),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, newClient)
 
 		token := newClient.Token()
@@ -220,7 +221,7 @@ func TestNewClient(t *testing.T) {
 func TestClient_GetUserAgent(t *testing.T) {
 	t.Run("get user agent", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 		userAgent := c.GetUserAgent()
 		assert.Equal(t, defaultUserAgent, userAgent)
@@ -231,13 +232,13 @@ func TestClient_GetUserAgent(t *testing.T) {
 func TestClient_NewState(t *testing.T) {
 	t.Run("generate a new state", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		var state string
 		state, err = c.NewState()
-		assert.NoError(t, err)
-		assert.Equal(t, 64, len(state))
+		require.NoError(t, err)
+		assert.Len(t, state, 64)
 	})
 }
 
@@ -245,12 +246,12 @@ func TestClient_NewState(t *testing.T) {
 func TestClient_Token(t *testing.T) {
 	t.Run("token is present", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		token := c.Token()
 		assert.NotNil(t, token)
@@ -258,12 +259,12 @@ func TestClient_Token(t *testing.T) {
 
 	t.Run("token is not present", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenFailed(http.StatusBadRequest)
 		err = c.UpdateApplicationAccessToken()
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		token := c.Token()
 		assert.Nil(t, token)
@@ -304,7 +305,7 @@ func TestDefaultClientOptions(t *testing.T) {
 	assert.Equal(t, defaultHTTPTimeout, options.httpTimeout)
 	assert.Equal(t, defaultRetryCount, options.retryCount)
 	assert.Equal(t, defaultUserAgent, options.userAgent)
-	assert.Equal(t, false, options.requestTracing)
+	assert.False(t, options.requestTracing)
 }
 
 // BenchmarkDefaultClientOptions benchmarks the method defaultClientOptions()

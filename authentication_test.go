@@ -8,6 +8,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestClient_GetAuthorizeURL will test the method GetAuthorizeURL()
@@ -16,13 +17,13 @@ func TestClient_GetAuthorizeURL(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		var state string
 		state, err = c.NewState()
-		assert.NoError(t, err)
-		assert.Equal(t, 64, len(state))
+		require.NoError(t, err)
+		assert.Len(t, state, 64)
 
 		authURL := c.GetAuthorizeURL(state, []string{
 			ScopeUserInfo,
@@ -44,12 +45,12 @@ func TestClient_UpdateApplicationAccessToken(t *testing.T) {
 
 	t.Run("test client, get application access token", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, testTokenType, c.options.token.TokenType)
 		assert.Equal(t, testExpiresIn, c.options.token.ExpiresIn)
@@ -59,58 +60,58 @@ func TestClient_UpdateApplicationAccessToken(t *testing.T) {
 
 	t.Run("failed to unmarshal JSON", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenBadJSON(testHost, http.StatusOK)
 		err = c.UpdateApplicationAccessToken()
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("request failed", func(t *testing.T) {
 
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenFailed(http.StatusBadRequest)
 		err = c.UpdateApplicationAccessToken()
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("token revoked or expired", func(t *testing.T) {
 
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenRevoked()
 		err = c.UpdateApplicationAccessToken()
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("token expired but auto-fetch new token", func(t *testing.T) {
 
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockExpiredApplicationAccessToken(testHost, http.StatusOK)
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Wait 2 seconds
 		time.Sleep(2 * time.Second)
 
 		// Token is expired
-		assert.Equal(t, true, c.IsTokenExpired(c.Token()))
+		assert.True(t, c.IsTokenExpired(c.Token()))
 
 		// Try another request - it will auto-fetch a new token
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddress(CoinTypeBSV.String())
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, wallets)
 	})
 }
@@ -122,13 +123,13 @@ func TestClient_GetUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		assert.Equal(t, testUserRefreshToken, userToken.RefreshToken)
@@ -142,13 +143,13 @@ func TestClient_GetUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenBadJSON(testHost, http.StatusBadRequest)
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 
@@ -156,13 +157,13 @@ func TestClient_GetUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenFailed(http.StatusBadRequest)
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 
@@ -170,13 +171,13 @@ func TestClient_GetUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockAccessTokenRevoked()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 }
@@ -187,13 +188,13 @@ func TestClient_RefreshUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		oldToken := userToken.AccessToken
@@ -201,7 +202,7 @@ func TestClient_RefreshUserToken(t *testing.T) {
 
 		mockRefreshUserAccessToken(testHost, http.StatusOK)
 		userToken, err = c.RefreshUserToken(userToken)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		assert.NotEqual(t, oldToken, userToken.AccessToken)
@@ -212,18 +213,18 @@ func TestClient_RefreshUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockAccessTokenBadJSON(testHost, http.StatusBadRequest)
 		userToken, err = c.RefreshUserToken(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 
@@ -231,18 +232,18 @@ func TestClient_RefreshUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockAccessTokenFailed(http.StatusExpectationFailed)
 		userToken, err = c.RefreshUserToken(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 
@@ -250,18 +251,18 @@ func TestClient_RefreshUserToken(t *testing.T) {
 
 		mockUpdateApplicationAccessToken()
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockAccessTokenRevoked()
 		userToken, err = c.RefreshUserToken(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, userToken)
 	})
 }
@@ -271,30 +272,30 @@ func TestClient_IsTokenExpired(t *testing.T) {
 
 	t.Run("token is valid and not expired", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		assert.Equal(t, false, c.IsTokenExpired(c.Token()))
+		assert.False(t, c.IsTokenExpired(c.Token()))
 	})
 
 	t.Run("token is expired", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockExpiredApplicationAccessToken(testHost, http.StatusOK)
 		err = c.UpdateApplicationAccessToken()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Sleep until the token is expired (1 second)
 		time.Sleep(2 * time.Second)
 
 		// Should be expired
-		assert.Equal(t, true, c.IsTokenExpired(c.Token()))
+		assert.True(t, c.IsTokenExpired(c.Token()))
 	})
 }
 

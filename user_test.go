@@ -7,6 +7,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestClient_UserInfo will test the method UserInfo()
@@ -14,19 +15,19 @@ func TestClient_UserInfo(t *testing.T) {
 
 	t.Run("test client, get user access token, get info", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockUserInfo(http.StatusOK)
 		var user *User
 		user, err = c.UserInfo(userToken)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, user)
 
 		assert.Equal(t, testUserAvatar, user.Avatar)
@@ -39,55 +40,55 @@ func TestClient_UserInfo(t *testing.T) {
 
 	t.Run("failed to unmarshal JSON", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockUserInfoBadJSON(http.StatusOK)
 		var user *User
 		user, err = c.UserInfo(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, user)
 	})
 
 	t.Run("request failed", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockUserInfoFailed(http.StatusOK)
 		var user *User
 		user, err = c.UserInfo(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, user)
 	})
 
 	t.Run("token revoked or expired", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockGetUserAccessToken()
 		var userToken *DotAccessToken
 		userToken, err = c.GetUserToken(testUserCode)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, userToken)
 
 		mockAccessTokenRevoked()
 		var user *User
 		user, err = c.UserInfo(userToken)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, user)
 	})
 }
@@ -97,14 +98,14 @@ func TestClient_UserReceiveAddress(t *testing.T) {
 
 	t.Run("test client, get receive address - bsv", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddress(CoinTypeBSV.String())
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, wallets)
 
 		assert.Equal(t, testUserBsvAddress, wallets.PrimaryWallet.Address)
@@ -115,14 +116,14 @@ func TestClient_UserReceiveAddress(t *testing.T) {
 
 	t.Run("test client, get receive address - btc", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddress(CoinTypeBTC.String())
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, wallets)
 
 		assert.Equal(t, CoinTypeBTC.String(), wallets.PrimaryWallet.CoinType)
@@ -130,14 +131,14 @@ func TestClient_UserReceiveAddress(t *testing.T) {
 
 	t.Run("test client, get receive address - eth", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddress(CoinTypeETH.String())
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, wallets)
 
 		assert.Equal(t, CoinTypeETH.String(), wallets.PrimaryWallet.CoinType)
@@ -145,40 +146,40 @@ func TestClient_UserReceiveAddress(t *testing.T) {
 
 	t.Run("failed to unmarshal JSON", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddressBadJSON(http.StatusOK)
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, wallets)
 	})
 
 	t.Run("request failed", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockUserReceiveAddressFailed(http.StatusOK)
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, wallets)
 	})
 
 	t.Run("token revoked or expired", func(t *testing.T) {
 		c, err := newTestClient()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, c)
 
 		mockUpdateApplicationAccessToken()
 		mockAccessTokenRevoked()
 		var wallets *Wallets
 		wallets, err = c.UserReceiveAddress(testUserID, CoinTypeBSV)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, wallets)
 	})
 }

@@ -155,7 +155,7 @@ type DotAccessToken struct {
 // accessTokenResponse is the response from creating the new access token
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-authorization
-type accessTokenResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type accessTokenResponse struct {
 	genericResponse
 	Data struct {
 		AccessToken  string `json:"access_token"`            // Access token from the API
@@ -169,28 +169,28 @@ type accessTokenResponse struct { //nolint: musttag // This struct was not creat
 // userResponse is the response from the user info request
 //
 // For more information: https://developers.dotwallet.com/documents/en/#user-info
-type userResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type userResponse struct {
 	genericResponse
 	Data struct {
 		User
 	}
 }
 
-type nftResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type nftResponse struct {
 	genericResponse
 	Data struct {
 		NftData
 	}
 }
 
-type nftMintResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type nftMintResponse struct {
 	genericResponse
 	Data struct {
 		NftMintData
 	}
 }
 
-type transferNftToAddressResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type transferNftToAddressResponse struct {
 	genericResponse
 	Data struct {
 		TransferNftToAddressData
@@ -262,7 +262,7 @@ type transferNftToAddressParam struct {
 // userReceiveAddressResponse is the response from the user receive address request
 //
 // For more information: https://developers.dotwallet.com/documents/en/#get-user-receive-address
-type userReceiveAddressResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type userReceiveAddressResponse struct {
 	genericResponse
 	Data struct {
 		Wallets
@@ -314,7 +314,7 @@ type MerkelProof struct {
 }
 
 // GetMerkleProofResponse is the response
-type GetMerkleProofResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type GetMerkleProofResponse struct {
 	genericResponse
 	Data struct {
 		MerkelProof
@@ -342,7 +342,7 @@ type MsgTxInfo struct {
 }
 
 // GetRawTransactionResponse is the response
-type GetRawTransactionResponse struct { //nolint: musttag // This struct was not created properly following Go conventions
+type GetRawTransactionResponse struct {
 	genericResponse
 	Data struct {
 		MsgTxInfo
