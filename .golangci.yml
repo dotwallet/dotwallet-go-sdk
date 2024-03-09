@@ -343,7 +343,6 @@ linters:
     - sqlclosecheck
     - nolintlint
     - gci
-    - goconst
 
   disable:
     - gocritic # use this for very opinionated linting
@@ -357,6 +356,8 @@ linters:
     - testpackage
     - nestif
     - nlreturn
+    - goconst
+    - musttag
   disable-all: false
   presets:
     - bugs
