@@ -9,12 +9,11 @@ require (
 	github.com/jarcoal/httpmock v1.4.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mrz1836/go-api-router v1.0.16
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 )
 
 require (
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -23,7 +22,6 @@ require (
 	github.com/mrz1836/go-parameters v1.0.8 // indirect
 	github.com/newrelic/go-agent/v3 v3.44.1 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.1.5 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
