@@ -9,7 +9,7 @@ require (
 	github.com/jarcoal/httpmock v1.4.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mrz1836/go-api-router v1.0.16
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 )
 
 require (
@@ -23,6 +23,7 @@ require (
 	github.com/newrelic/go-agent/v3 v3.44.1 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.1.5 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
@@ -30,7 +31,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7 // indirect
 	google.golang.org/grpc v1.82.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // Issue with using wrong version of Redigo
