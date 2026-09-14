@@ -1,6 +1,6 @@
 module github.com/dotwallet/dotwallet-go-sdk
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/btcsuite/btcd v0.24.0
@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/jarcoal/httpmock v1.4.2
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/mrz1836/go-api-router v1.0.16
+	github.com/mrz1836/go-api-router v1.1.0
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -20,17 +20,17 @@ require (
 	github.com/matryer/respond v1.0.1 // indirect
 	github.com/mrz1836/go-logger v1.0.6 // indirect
 	github.com/mrz1836/go-parameters v1.0.8 // indirect
-	github.com/newrelic/go-agent/v3 v3.44.1 // indirect
+	github.com/newrelic/go-agent/v3 v3.44.2 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.1.5 // indirect
-	github.com/ugorji/go/codec v1.3.1 // indirect
+	github.com/ugorji/go/codec v1.3.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7 // indirect
-	google.golang.org/grpc v1.82.0 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260908043556-f8649ddbbfe6 // indirect
+	google.golang.org/grpc v1.83.2 // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 )
 
 // Issue with using wrong version of Redigo
