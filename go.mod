@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/jarcoal/httpmock v1.4.2
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/mrz1836/go-api-router v1.1.0
+	github.com/mrz1836/go-api-router v1.1.1
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -16,20 +16,21 @@ require (
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/google/pprof v0.0.0-20261008003335-7bae8d8c4c9e // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/matryer/respond v1.0.1 // indirect
 	github.com/mrz1836/go-logger v1.0.6 // indirect
 	github.com/mrz1836/go-parameters v1.0.8 // indirect
-	github.com/newrelic/go-agent/v3 v3.44.2 // indirect
+	github.com/newrelic/go-agent/v3 v3.45.0 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.1.5 // indirect
 	github.com/ugorji/go/codec v1.3.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260908043556-f8649ddbbfe6 // indirect
-	google.golang.org/grpc v1.83.2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
