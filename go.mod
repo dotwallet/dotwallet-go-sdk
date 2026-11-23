@@ -8,7 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/jarcoal/httpmock v1.4.2
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/mrz1836/go-api-router v1.1.2
+	github.com/mrz1836/go-api-router v1.1.3
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -19,8 +19,8 @@ require (
 	github.com/google/pprof v0.0.0-20261102214848-0031fcd306b0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/matryer/respond v1.0.1 // indirect
-	github.com/mrz1836/go-logger v1.0.6 // indirect
-	github.com/mrz1836/go-parameters v1.0.8 // indirect
+	github.com/mrz1836/go-logger v1.0.7 // indirect
+	github.com/mrz1836/go-parameters v1.0.9 // indirect
 	github.com/newrelic/go-agent/v3 v3.45.0 // indirect
 	github.com/newrelic/go-agent/v3/integrations/nrhttprouter v1.1.5 // indirect
 	github.com/ugorji/go/codec v1.3.2 // indirect
